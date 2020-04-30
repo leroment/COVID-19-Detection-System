@@ -27,6 +27,7 @@ const UsersList = () => {
       })
       .catch((err) => {
         setUsers(null);
+        console.log(err);
       });
   }, []);
 
