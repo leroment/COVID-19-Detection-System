@@ -25,7 +25,7 @@ const UsersList = () => {
           setUsers(response.data);
         }, 500);
       })
-      .catch(() => {
+      .catch((err) => {
         setUsers(null);
       });
   }, []);
@@ -35,7 +35,12 @@ const UsersList = () => {
       <h2>Users</h2>
       {users === undefined
         ? "FETCHING"
-        : users && users.map((user) => <User key={user.url} user={user}/>)}
+        : (
+          users === null
+            ? "ERROR"
+            : users.map((user) => <User key={user.url} user={user}/>)
+        )
+      }
     </div>
   );
 };
