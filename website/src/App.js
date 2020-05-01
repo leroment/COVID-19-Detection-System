@@ -5,6 +5,7 @@ import "./App.css";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import { Container } from "@material-ui/core";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
 const User = (props) => {
   const { user } = props;
@@ -49,8 +50,9 @@ const UsersList = () => {
 
 function App() {
   return (
-    <div className="App">
-      {/* <header className="App-header">
+    <Router>
+      <div className="App">
+        {/* <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
           Edit <code>src/App.js</code> and save to reload.
@@ -65,10 +67,14 @@ function App() {
         </a>
       </header>
       <UsersList /> */}
-      <Container>
-        <Login />
-      </Container>
-    </div>
+        <Container>
+          <Switch>
+            <Route exact path="/" component={Login} />
+            <Route path="/register" component={Register} />
+          </Switch>
+        </Container>
+      </div>
+    </Router>
   );
 }
 

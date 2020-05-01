@@ -1,29 +1,11 @@
 import React, { useState } from "react";
-import {
-  Button,
-  TextField,
-  Grid,
-  Link as MaterialLink,
-} from "@material-ui/core";
+import { Grid, TextField, Button } from "@material-ui/core";
 import { Link } from "react-router-dom";
 
-function Login() {
+function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  // function validateForm() {
-  //   return email.length > 0 && password.length > 0;
-  // }
-
-  function handleSubmit(event) {
-    event.preventDefault();
-
-    if (email === "admin@admin.com" && password === "admin123") {
-      console.log("Logged in Successfully!");
-      setIsLoggedIn(true);
-    }
-  }
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   return (
     <form>
@@ -35,7 +17,13 @@ function Login() {
         spacing={2}
         style={{ minHeight: "100vh" }}
       >
-        <h1>Welcome to COVID-19 Detection!</h1>
+        <h1>Register</h1>
+        <Grid item>
+          <TextField name="firstname" type="text" placeholder="First Name" />
+        </Grid>
+        <Grid item>
+          <TextField name="lastname" type="text" placeholder="Last Name" />
+        </Grid>
         <Grid item>
           <TextField
             name="email"
@@ -55,26 +43,29 @@ function Login() {
           />
         </Grid>
         <Grid item>
+          <TextField
+            type="password"
+            name="confirmPassword"
+            placeholder="Confirm Password"
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            value={confirmPassword}
+          />
+        </Grid>
+        <Grid item>
           <Button
-            onClick={handleSubmit}
             // disabled={!validateForm()}
             variant="contained"
             color="primary"
           >
-            Login
+            Register
           </Button>
         </Grid>
         <Grid item>
-          <Link to="/register">
-            <MaterialLink href="#">Register</MaterialLink>
-          </Link>
-        </Grid>
-        <Grid item>
-          <Link>Forgot Your Password?</Link>
+          <Link to="/">Login</Link>
         </Grid>
       </Grid>
     </form>
   );
 }
 
-export default Login;
+export default Register;
