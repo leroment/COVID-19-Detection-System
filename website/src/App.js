@@ -10,7 +10,7 @@ function App() {
   return (
     <Router>
       <div className="App">
-        <Container disableGutters={true} maxWidth={false}>
+        <Container disableGutters="true" maxWidth="none">
           <Switch>
             <Route exact path="/" component={Login} />
             <Route path="/register" component={Register} />
