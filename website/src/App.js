@@ -9,15 +9,13 @@ import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 function App() {
   return (
     <Router>
-      <div className="App">
-        <Container disableGutters="true" maxWidth="none">
-          <Switch>
-            <Route exact path="/" component={Login} />
-            <Route path="/register" component={Register} />
-            <Route path="/dashboard" component={Dashboard} />
-          </Switch>
-        </Container>
-      </div>
+      <Container disableGutters maxWidth={false}>
+        <Switch>
+          <Route exact path="/" component={Login} />
+          <Route path="/register" component={Register} />
+          <Route path="/dashboard" component={Dashboard} />
+        </Switch>
+      </Container>
     </Router>
   );
 }

@@ -74,7 +74,7 @@ function Login() {
             alignItems="center"
             direction="column"
             spacing={2}
-            style={{ minHeight: "100vh" }}
+            style={{ height: "100vh", width: "100%" }}
           >
             <h1>Welcome to COVID-19 Detection!</h1>
             <Grid item>
