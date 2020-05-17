@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Menubar from "./Menubar";
 import {
@@ -6,23 +6,16 @@ import {
   Table,
   TableCell,
   TableBody,
-  TableContainer,
   TableHead,
   TableRow,
-  TableFooter,
-  Paper,
   Button,
   Divider,
   Card,
-  CardActions,
   CardHeader,
   CardContent,
-  Tooltip,
-  TableSortLabel,
-  Hidden,
 } from "@material-ui/core";
 import { grey } from "@material-ui/core/colors";
-import ArrowRightIcon from "@material-ui/icons/ArrowRight";
+import NewDiagnosis from "./NewDiagnosis";
 
 const useStyles = makeStyles({
   table: {
@@ -40,6 +33,9 @@ const useStyles = makeStyles({
   },
   button: {
     margin: "0px 0px 10px 82%",
+  },
+  actionButton: {
+    margin: "7px 0 0 0",
   },
   card: {
     width: 275,
@@ -63,6 +59,15 @@ const rows = [
 
 export default function Dashboard() {
   const classes = useStyles();
+  const [open, setOpen] = useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const callback = (value) => {
+    setOpen(false);
+  };
 
   return (
     <div className={classes.root}>
@@ -103,12 +108,19 @@ export default function Dashboard() {
           <Card>
             <CardHeader
               action={
-                <Button color="primary" size="small" variant="outlined">
+                <Button
+                  color="primary"
+                  size="small"
+                  variant="outlined"
+                  onClick={handleClickOpen}
+                  className={classes.actionButton}
+                >
                   New Diagnosis +
                 </Button>
               }
               title="Current Diagnoses"
             />
+            <NewDiagnosis open={open} parentCallback={callback} />
             <Divider />
             <CardContent>
               <Table className={classes.table}>

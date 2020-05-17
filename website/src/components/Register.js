@@ -73,7 +73,7 @@ export default function Register2() {
                 onBlur={handleBlur}
                 value={values.firstName}
                 label="First Name"
-                error={touched.firstName && errors.firstName}
+                error={touched.firstName && (errors.firstName ? true : false)}
                 helperText={touched.firstName && errors.firstName}
               />
             </Grid>
@@ -89,7 +89,7 @@ export default function Register2() {
                 onBlur={handleBlur}
                 value={values.lastName}
                 label="Last Name"
-                error={touched.lastName && errors.lastName}
+                error={touched.lastName && (errors.lastName ? true : false)}
                 helperText={touched.lastName && errors.lastName}
               />
             </Grid>
@@ -105,7 +105,7 @@ export default function Register2() {
                 onBlur={handleBlur}
                 value={values.email}
                 label="Email Address"
-                error={touched.email && errors.email}
+                error={touched.email && (errors.email ? true : false)}
                 helperText={touched.email && errors.email}
               />
             </Grid>
@@ -121,7 +121,7 @@ export default function Register2() {
                 onBlur={handleBlur}
                 label="Password"
                 value={values.password}
-                error={touched.password && errors.password}
+                error={touched.password && (errors.password ? true : false)}
                 helperText={touched.password && errors.password}
               />
             </Grid>
@@ -137,7 +137,10 @@ export default function Register2() {
                 onBlur={handleBlur}
                 label="Confirm Password"
                 value={values.confirmPassword}
-                error={touched.confirmPassword && errors.confirmPassword}
+                error={
+                  touched.confirmPassword &&
+                  (errors.confirmPassword ? true : false)
+                }
                 helperText={touched.confirmPassword && errors.confirmPassword}
               />
             </Grid>

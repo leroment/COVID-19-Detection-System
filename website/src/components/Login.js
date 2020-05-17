@@ -51,7 +51,7 @@ function Login() {
       onSubmit={(values, { setSubmitting, resetForm }) => {
         setSubmitting(true);
         setTimeout(() => {
-          // alert(JSON.stringify(values, null, 2));
+          console.log(values);
           resetForm();
           setSubmitting(false);
           setRedirectToDashboard(true);
@@ -81,14 +81,14 @@ function Login() {
               <TextField
                 disabled={isSubmitting}
                 name="email"
-                type="email"
+                type="text"
                 placeholder="Email Address"
                 onChange={handleChange}
                 onBlur={handleBlur}
                 value={values.email}
                 label="Email Address"
                 variant="outlined"
-                error={touched.email && errors.email}
+                error={touched.email && (errors.email ? true : false)}
                 helperText={touched.email && errors.email}
               />
             </Grid>
@@ -102,7 +102,7 @@ function Login() {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 placeholder="Password"
-                error={touched.password && errors.password}
+                error={touched.password && (errors.password ? true : false)}
                 helperText={touched.password && errors.password}
                 value={values.password}
               />
