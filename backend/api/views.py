@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .serializers import UserSerializer
+from .serializers import UserSerializer, UserValidationSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -27,12 +27,14 @@ class LoginView(APIView):
                 'user': UserSerializer(user, context={'request': request}).data,
             }, status=status.HTTP_200_OK)
         else:
-            return Response('Invalid credentials', status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                'error': 'Invalid credentials'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 
 class RegisterView(APIView):
     def post(self, request):
-        serialized = UserSerializer(data={
+        serialized = UserValidationSerializer(data={
             'email': request.data.get('email'),
             'username': request.data.get('email'),
             'first_name': request.data.get('first_name'),
@@ -47,6 +49,6 @@ class RegisterView(APIView):
                 first_name=serialized.validated_data['first_name'],
                 last_name=serialized.validated_data['last_name'],
             )
-            return Response(serialized.validated_data, status=status.HTTP_201_CREATED)
+            return Response(UserSerializer(user, context={'request': request}).data, status=status.HTTP_201_CREATED)
         else:
             return Response(serialized._errors, status=status.HTTP_400_BAD_REQUEST)
