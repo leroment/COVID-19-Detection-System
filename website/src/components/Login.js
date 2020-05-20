@@ -7,6 +7,7 @@ import { Button, TextField, Grid } from "@material-ui/core";
 import { Link, Redirect } from "react-router-dom";
 import { Formik } from "formik";
 import * as Yup from "yup";
+import axios from 'axios';
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
@@ -31,6 +32,7 @@ function Login() {
   const classes = useStyles();
   const validationSchema = Yup.object().shape({
     email: Yup.string()
+      // TODO does not match email validation of Django (two character TLD e.g "a@gmail.a")
       .email("Invalid email address")
       .required("Must enter an email address"),
     password: Yup.string().required("Password is required"),
@@ -51,10 +53,19 @@ function Login() {
       onSubmit={(values, { setSubmitting, resetForm }) => {
         setSubmitting(true);
         setTimeout(() => {
-          console.log(values);
-          resetForm();
-          setSubmitting(false);
-          setRedirectToDashboard(true);
+          axios.post('http://127.0.0.1:8000/api/login', {
+            email: values.email,
+            password: values.password,
+          })
+            .then((response) => {
+              localStorage.setItem('token', response.data.token);
+              setRedirectToDashboard(true);
+            })
+            .catch(() => {
+              // TODO error messages
+              // formik.setError ??
+              setSubmitting(false)
+            });
         }, 500);
       }}
     >
