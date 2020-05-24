@@ -1,11 +1,17 @@
 import React, { useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import Backdrop from "@material-ui/core/Backdrop";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { green, grey } from "@material-ui/core/colors";
-import { Button, TextField, Grid, Snackbar } from "@material-ui/core";
+import {
+  Button,
+  TextField,
+  Grid,
+  Snackbar,
+  Link,
+  Backdrop,
+} from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
-import { Link, Redirect } from "react-router-dom";
+import { Redirect, Link as RouterLink } from "react-router-dom";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
@@ -31,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function Login() {
+function Login(props) {
   const classes = useStyles();
   const validationSchema = Yup.object().shape({
     email: Yup.string()
@@ -103,11 +109,11 @@ function Login() {
               0: covid,
             }}
             how={
-              30
+              10
             } /* Pass the number of images Sky will render chosing randomly */
             time={40} /* time of animation */
             size={"64px"} /* size of the rendered images */
-            background={grey[400]} /* color of background */
+            background={grey[200]} /* color of background */
           />
           <Snackbar
             open={snackbarOpen}
@@ -175,10 +181,14 @@ function Login() {
               )}
             </Grid>
             <Grid item>
-              <Link to="/register">Register</Link>
+              <Link component={RouterLink} to="/register">
+                Register
+              </Link>
             </Grid>
             <Grid item>
-              <Link to="/">Forgot Your Password?</Link>
+              <Link component={RouterLink} to="/">
+                Forgot Your Password?
+              </Link>
             </Grid>
           </Grid>
           <Backdrop className={classes.backdrop} open={isSubmitting}>

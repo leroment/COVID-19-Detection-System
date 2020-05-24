@@ -4,26 +4,41 @@ import Login from "./components/Login";
 import Register from "./components/Register";
 import Dashboard from "./components/Dashboard";
 import { Container } from "@material-ui/core";
-import { BrowserRouter as Router, Switch, Route, Redirect } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Redirect,
+} from "react-router-dom";
 
 const isAuthenticated = () => {
-  return !!localStorage.getItem('token');
-}
+  return !!localStorage.getItem("token");
+};
 
 const UnPrivateRoute = ({ component: Component, ...rest }) => (
-  <Route {...rest} render={(props) => (
-      isAuthenticated() === true
-        ? <Redirect to='/dashboard' />
-        : <Component {...props} />
-  )} />
+  <Route
+    {...rest}
+    render={(props) =>
+      isAuthenticated() === true ? (
+        <Redirect to="/dashboard" />
+      ) : (
+        <Component {...props} />
+      )
+    }
+  />
 );
 
 const PrivateRoute = ({ component: Component, ...rest }) => (
-  <Route {...rest} render={(props) => (
-      isAuthenticated() === true
-        ? <Component {...props} />
-        : <Redirect to='/' />
-  )} />
+  <Route
+    {...rest}
+    render={(props) =>
+      isAuthenticated() === true ? (
+        <Component {...props} />
+      ) : (
+        <Redirect to="/" />
+      )
+    }
+  />
 );
 
 function App() {
