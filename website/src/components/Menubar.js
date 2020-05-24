@@ -43,6 +43,7 @@ export default function Menubar() {
 
   const handleLogout = () => {
     setAnchorEl(null);
+    localStorage.removeItem('token');
     setRedirectToLogin(true);
   };
 

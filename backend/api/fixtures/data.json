@@ -1,0 +1,38 @@
+[
+    {
+        "model": "auth.user",
+        "pk": 1,
+        "fields": {
+            "password": "pbkdf2_sha256$180000$DWwtGSCq72yq$G1cN88W/4LkUrLgMd5fcwSj13ZN51MxaPSAa7cFCW7A=",
+            "last_login": "2020-05-20T02:11:00.457Z",
+            "is_superuser": true,
+            "username": "tim.m.porritt@gmail.com",
+            "first_name": "Tim",
+            "last_name": "Porritt",
+            "email": "tim.m.porritt@gmail.com",
+            "is_staff": true,
+            "is_active": true,
+            "date_joined": "2020-05-18T04:56:41.578Z",
+            "groups": [],
+            "user_permissions": []
+        }
+    },
+    {
+        "model": "auth.user",
+        "pk": 2,
+        "fields": {
+            "password": "pbkdf2_sha256$180000$DWwtGSCq72yq$G1cN88W/4LkUrLgMd5fcwSj13ZN51MxaPSAa7cFCW7A=",
+            "last_login": "2020-05-20T02:11:00.457Z",
+            "is_superuser": false,
+            "username": "tim@gmail.com",
+            "first_name": "Tim",
+            "last_name": "Porritt",
+            "email": "tim@gmail.com",
+            "is_staff": false,
+            "is_active": true,
+            "date_joined": "2020-05-18T04:56:41.578Z",
+            "groups": [],
+            "user_permissions": []
+        }
+    }
+]

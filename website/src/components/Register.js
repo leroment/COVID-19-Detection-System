@@ -3,6 +3,7 @@ import { Formik } from "formik";
 import { Grid, TextField, Button } from "@material-ui/core";
 import * as Yup from "yup";
 import { Link } from "react-router-dom";
+import axios from 'axios';
 
 const validationSchema = Yup.object().shape({
   firstName: Yup.string()
@@ -35,11 +36,25 @@ export default function Register2() {
       onSubmit={(values, { setSubmitting, resetForm }) => {
         setSubmitting(true);
 
-        setTimeout(() => {
-          alert(JSON.stringify(values, null, 2));
-          resetForm();
+        axios.post('http://127.0.0.1:8000/api/register/', {
+          email: values.email,
+          first_name: values.firstName,
+          last_name: values.lastName,
+          password: values.password,
+        }).then((response) => {
+          console.log(response);
+          // TODO redirect to login
+        }).then((error) => {
+          console.log(error);
+          // TODO error message
+          // formik.setError ??
           setSubmitting(false);
-        }, 500);
+        });
+
+        // setTimeout(() => {
+        //   alert(JSON.stringify(values, null, 2));
+        //   resetForm();
+        // }, 500);
       }}
     >
       {({
