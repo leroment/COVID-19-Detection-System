@@ -2,23 +2,15 @@ import React, { useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Backdrop from "@material-ui/core/Backdrop";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import { green } from "@material-ui/core/colors";
-<<<<<<< HEAD
-import { Button, TextField, Grid, Card } from "@material-ui/core";
-import { Link, Redirect } from "react-router-dom";
-import { Formik } from "formik";
-import * as Yup from "yup";
-import Sky from "react-sky";
-import covid from "../assets/covid.png";
-import { grey } from "@material-ui/core/colors";
-=======
+import { green, grey } from "@material-ui/core/colors";
 import { Button, TextField, Grid, Snackbar } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
 import { Link, Redirect } from "react-router-dom";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
->>>>>>> authentication
+import Sky from "react-sky";
+import covid from "../assets/covid.png";
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
@@ -105,6 +97,18 @@ function Login() {
         isSubmitting,
       }) => (
         <form onSubmit={handleSubmit}>
+          <Sky
+            images={{
+              /* FORMAT AS FOLLOWS */
+              0: covid,
+            }}
+            how={
+              30
+            } /* Pass the number of images Sky will render chosing randomly */
+            time={40} /* time of animation */
+            size={"64px"} /* size of the rendered images */
+            background={grey[400]} /* color of background */
+          />
           <Snackbar
             open={snackbarOpen}
             autoHideDuration={6000}
@@ -168,52 +172,21 @@ function Login() {
                   size={24}
                   className={classes.buttonProgress}
                 />
-              </Grid>
-              <Grid item>
-                <TextField
-                  disabled={isSubmitting}
-                  type="password"
-                  id="password"
-                  variant="filled"
-                  name="password"
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  placeholder="Password"
-                  error={touched.password && (errors.password ? true : false)}
-                  helperText={touched.password && errors.password}
-                  value={values.password}
-                />
-              </Grid>
-              <Grid item className={classes.wrapper}>
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  variant="contained"
-                  color="primary"
-                >
-                  Login
-                </Button>
-                {isSubmitting && (
-                  <CircularProgress
-                    size={24}
-                    className={classes.buttonProgress}
-                  />
-                )}
-              </Grid>
-              <Grid item>
-                <Link to="/register">Register</Link>
-              </Grid>
-              <Grid item>
-                <Link to="/">Forgot Your Password?</Link>
-              </Grid>
+              )}
             </Grid>
-            <Backdrop className={classes.backdrop} open={isSubmitting}>
-              <CircularProgress color="inherit" />
-            </Backdrop>
-          </form>
-        )}
-      </Formik>
-    </div>
+            <Grid item>
+              <Link to="/register">Register</Link>
+            </Grid>
+            <Grid item>
+              <Link to="/">Forgot Your Password?</Link>
+            </Grid>
+          </Grid>
+          <Backdrop className={classes.backdrop} open={isSubmitting}>
+            <CircularProgress color="inherit" />
+          </Backdrop>
+        </form>
+      )}
+    </Formik>
   );
 }
 
