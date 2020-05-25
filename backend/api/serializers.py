@@ -25,12 +25,12 @@ class TemperatureSerializer(serializers.ModelSerializer):
 class AudioSerializer(serializers.ModelSerializer):
     class Meta:
         model = AudioRecording
-        fields = ['id', 'file']
+        fields = ['id']
 
 class XraySerializer(serializers.ModelSerializer):
     class Meta:
         model = XrayImage
-        fields = ['id', 'file']
+        fields = ['id']
 
 
 class DiagnosisSerializer(serializers.ModelSerializer):
@@ -46,12 +46,4 @@ class DiagnosisSerializer(serializers.ModelSerializer):
             'temperaturereadings',
             'audiorecordings',
             'xrayimages',
-        ]
-
-
-class UserDiagnosisSerializer(DiagnosisSerializer):
-    class Meta:
-        model = Diagnosis
-        fields = [
-            'temperaturereadings',
         ]

@@ -1,14 +1,16 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from django.http import HttpResponse
 from rest_framework import status, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import ValidationError
 import json
+import magic
 
-from .serializers import UserSerializer, UserValidationSerializer, DiagnosisSerializer, UserDiagnosisSerializer
+from .serializers import UserSerializer, UserValidationSerializer, DiagnosisSerializer, XraySerializer, AudioSerializer, TemperatureSerializer
 from .models import Diagnosis, TemperatureReading, AudioRecording, XrayImage
 
 import logging
@@ -43,11 +45,42 @@ class UserDiagnosisViewSet(viewsets.ModelViewSet):
         return Diagnosis.objects.filter(user=user_id)
 
     def create(self, request, *args, **kwargs):
-        data = json.loads(request.data.get('data'))
-        audio_data = request.FILES['audio']
+        validation_errors = {}
+
+        data = None
+        try:
+            data = json.loads(request.data.get('data'))
+        except TypeError:
+            validation_errors['data'] = 'Must be JSON'
+
+        audio_data = request.FILES.get('audio')
         xray_data = request.FILES.get('xray')
         user_id = int(self.kwargs['user_pk'])
 
+
+        # Check audio is WAV
+        if audio_data:
+            audio_mime = magic.from_buffer(audio_data.read(), mime=True)
+            if audio_mime not in ['audio/x-wav', 'audio/wav']:
+                validation_errors['audio'] = 'Audio must be in WAV format'
+        else:
+            validation_errors['audio'] = 'Audio required'
+
+        # Check xray is PNG
+        if xray_data:
+            xray_mime = magic.from_buffer(xray_data.read(), mime=True)
+            if xray_mime != 'image/png':
+                validation_errors['xray'] = 'Xray must be a PNG image'
+
+        if not data or 'temperature' not in data:
+            validation_errors['temperature'] = 'Temperature required'
+        elif type(data['temperature']) not in [int, float]:
+            validation_errors['temperature'] = 'Temperature must be a number'
+
+        if validation_errors:
+            raise ValidationError(validation_errors)
+
+        # Create items in database
         diagnosis = Diagnosis.objects.create(
             user_id=user_id,
         )
@@ -71,12 +104,35 @@ class UserDiagnosisViewSet(viewsets.ModelViewSet):
             'audio_id': audio.id,
         }
 
-        if xray:
+        if xray_data:
             response_data['xray_id'] = xray.id
 
-        # TODO errors
-        # TODO validation
         return Response(response_data, status=status.HTTP_201_CREATED)
+
+
+class XrayViewSet(viewsets.ReadOnlyModelViewSet):
+    # TODO restrict to only specific User and Health Officers
+    queryset = XrayImage.objects.all()
+    serializer_class = XraySerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        return HttpResponse(instance.file, content_type='image/png')
+
+
+class AudioViewSet(viewsets.ReadOnlyModelViewSet):
+    # TODO restrict to only specific User and Health Officers
+    queryset = AudioRecording.objects.all()
+    serializer_class = AudioSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        return HttpResponse(instance.file, content_type='audio/wav')
+
+
+class TemperatureViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = TemperatureReading.objects.all()
+    serializer_class = TemperatureSerializer
 
 
 class LoginView(APIView):
