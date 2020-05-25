@@ -1,13 +1,22 @@
 import React, { useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import Backdrop from "@material-ui/core/Backdrop";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import { green } from "@material-ui/core/colors";
-import { Button, TextField, Grid } from "@material-ui/core";
-import { Link, Redirect } from "react-router-dom";
+import { green, grey } from "@material-ui/core/colors";
+import {
+  Button,
+  TextField,
+  Grid,
+  Snackbar,
+  Link,
+  Backdrop,
+} from "@material-ui/core";
+import { Alert } from "@material-ui/lab";
+import { Redirect, Link as RouterLink } from "react-router-dom";
 import { Formik } from "formik";
 import * as Yup from "yup";
-import axios from 'axios';
+import axios from "axios";
+import Sky from "react-sky";
+import covid from "../assets/covid.png";
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
@@ -28,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function Login() {
+function Login(props) {
   const classes = useStyles();
   const validationSchema = Yup.object().shape({
     email: Yup.string()
@@ -39,9 +48,18 @@ function Login() {
   });
   const [redirectToDashboard, setRedirectToDashboard] = useState(false);
 
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+
   if (redirectToDashboard) {
     return <Redirect to="/dashboard" />;
   }
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setSnackbarOpen(false);
+  };
 
   return (
     <Formik
@@ -53,18 +71,24 @@ function Login() {
       onSubmit={(values, { setSubmitting, resetForm }) => {
         setSubmitting(true);
         setTimeout(() => {
-          axios.post('http://127.0.0.1:8000/api/login', {
-            email: values.email,
-            password: values.password,
-          })
+          axios
+            .post("http://127.0.0.1:8000/api/login", {
+              email: values.email,
+              password: values.password,
+            })
             .then((response) => {
-              localStorage.setItem('token', response.data.token);
+              localStorage.setItem("token", response.data.token);
               setRedirectToDashboard(true);
             })
-            .catch(() => {
+            .catch((err) => {
               // TODO error messages
               // formik.setError ??
-              setSubmitting(false)
+
+              if (err.response.status === 400) {
+                setSnackbarOpen(true);
+              }
+
+              setSubmitting(false);
             });
         }, 500);
       }}
@@ -79,6 +103,28 @@ function Login() {
         isSubmitting,
       }) => (
         <form onSubmit={handleSubmit}>
+          <Sky
+            images={{
+              /* FORMAT AS FOLLOWS */
+              0: covid,
+            }}
+            how={
+              10
+            } /* Pass the number of images Sky will render chosing randomly */
+            time={40} /* time of animation */
+            size={"64px"} /* size of the rendered images */
+            background={grey[200]} /* color of background */
+          />
+          <Snackbar
+            open={snackbarOpen}
+            autoHideDuration={6000}
+            anchorOrigin={{ vertical: "top", horizontal: "center" }}
+            onClose={handleCloseSnackbar}
+          >
+            <Alert onClose={handleCloseSnackbar} severity="error">
+              Invalid username/password! Please try again.
+            </Alert>
+          </Snackbar>
           <Grid
             container
             justify="center"
@@ -135,10 +181,14 @@ function Login() {
               )}
             </Grid>
             <Grid item>
-              <Link to="/register">Register</Link>
+              <Link component={RouterLink} to="/register">
+                Register
+              </Link>
             </Grid>
             <Grid item>
-              <Link to="/">Forgot Your Password?</Link>
+              <Link component={RouterLink} to="/">
+                Forgot Your Password?
+              </Link>
             </Grid>
           </Grid>
           <Backdrop className={classes.backdrop} open={isSubmitting}>
