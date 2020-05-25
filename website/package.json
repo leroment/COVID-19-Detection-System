@@ -19,6 +19,7 @@
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.4.1",
     "react-sky": "^1.1.0",
+    "react-timer-hook": "^2.0.2",
     "yup": "^0.28.5"
   },
   "scripts": {

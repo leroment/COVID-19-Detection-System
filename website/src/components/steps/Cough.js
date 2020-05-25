@@ -4,7 +4,6 @@ import { IconButton, Grid, Button } from "@material-ui/core";
 import { ReactMic } from "react-mic";
 import { makeStyles } from "@material-ui/core/styles";
 import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord";
-import StopIcon from "@material-ui/icons/Stop";
 import BackgroundImage from "../../assets/audio.png";
 
 const useStyles = makeStyles((theme) => ({
@@ -27,26 +26,31 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Cough() {
+export default function Cough(props) {
   const classes = useStyles();
 
   const [record, setRecord] = useState(false);
   const [recordedBlob, setRecordedBlob] = useState("");
+  const [count, setCount] = useState(20);
 
   const onStop = (recordedBlob) => {
+    setRecord(false);
     console.log("recordedBlob is: ", recordedBlob);
     setRecordedBlob(recordedBlob.blobURL);
   };
 
-  // const onData = (recordedBlob) => {
-  //   console.log("chunk of real-time data is: ", recordedBlob);
-  // };
-
   const clickRecord = () => {
-    setRecord(!record);
+    setRecord(true);
+    setRecordedBlob("");
+
+    var interval = setInterval(() => {
+      setCount((prev) => (prev = prev - 1));
+    }, 1000);
 
     setTimeout(() => {
+      clearInterval(interval);
       setRecord(false);
+      setCount(20);
     }, 21000);
   };
 
@@ -89,22 +93,22 @@ export default function Cough() {
           spacing={2}
         >
           <Grid item>
-            <IconButton
-              aria-label="record"
-              color="secondary"
-              onClick={clickRecord}
-              style={{ backgroundColor: "grey" }}
-              size="medium"
-            >
-              {record ? (
-                <StopIcon fontSize="inherit" style={{ fill: "white" }} />
-              ) : (
+            {record ? (
+              <React.Fragment>{count}</React.Fragment>
+            ) : (
+              <IconButton
+                aria-label="record"
+                color="secondary"
+                onClick={clickRecord}
+                style={{ backgroundColor: "grey" }}
+                size="medium"
+              >
                 <FiberManualRecordIcon
                   fontSize="inherit"
                   style={{ fill: "white" }}
                 />
-              )}
-            </IconButton>
+              </IconButton>
+            )}
           </Grid>
           <Grid item>
             <audio
@@ -115,7 +119,7 @@ export default function Cough() {
           </Grid>
           <Grid item>
             or&nbsp;&nbsp;&nbsp;
-            <Button variant="contained" component="label">
+            <Button variant="contained" component="label" disabled={record}>
               Upload File
               <input type="file" style={{ display: "none" }} />
             </Button>
