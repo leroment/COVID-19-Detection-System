@@ -21,6 +21,7 @@ import Xray from "./steps/Xray";
 const useStyles = makeStyles((theme) => ({
   root: {
     width: "100%",
+    height: "100%",
   },
   button: {
     marginRight: theme.spacing(1),
