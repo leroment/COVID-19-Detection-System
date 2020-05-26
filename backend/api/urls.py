@@ -5,7 +5,7 @@ from .views import UserViewSet, DiagnosisViewSet, UserDiagnosisViewSet, Register
 
 
 # Routers provide an easy way of automatically determining the URL conf.
-router = routers.SimpleRouter()
+router = routers.DefaultRouter()
 router.register(r'users', UserViewSet)
 router.register(r'diagnoses', DiagnosisViewSet, basename='diagnoses')
 router.register(r'xrays', XrayViewSet, basename='xrays')
