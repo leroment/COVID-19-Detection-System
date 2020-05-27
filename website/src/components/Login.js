@@ -78,6 +78,7 @@ function Login(props) {
             })
             .then((response) => {
               localStorage.setItem("token", response.data.token);
+              localStorage.setItem("userId", response.data.user.id);
               setRedirectToDashboard(true);
             })
             .catch((err) => {

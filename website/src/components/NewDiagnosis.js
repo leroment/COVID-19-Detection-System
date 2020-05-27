@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { makeStyles, withStyles } from "@material-ui/core/styles";
+import axios from "axios";
 import { Checkmark } from "react-checkmark";
 import {
   Dialog,
@@ -87,25 +88,49 @@ function getSteps() {
   return ["Enter Temperature", "Upload Cough Sample", "Upload X-Ray Image"];
 }
 
-function getStepContent(step) {
-  switch (step) {
-    case 0:
-      return <Temperature />;
-    case 1:
-      return <Cough />;
-    case 2:
-      return <Xray />;
-    default:
-      return "Unknown step";
-  }
-}
-
 export default function NewDiagnosis(props) {
   const { open, parentCallback } = props;
   const classes = useStyles();
   const [activeStep, setActiveStep] = useState(0);
+  const [theTemp, setTheTemp] = useState(0);
+  const [theCough, setTheCough] = useState(null);
+  const [theXray, setTheXray] = useState(null);
   // const [skipped, setSkipped] = useState(new Set());
   const steps = getSteps();
+
+  function getStepContent(step) {
+    switch (step) {
+      case 0:
+        return (
+          <Temperature
+            temp={(temp) => {
+              setTheTemp(temp);
+            }}
+            existingTemp={theTemp}
+          />
+        );
+      case 1:
+        return (
+          <Cough
+            cough={(cough) => {
+              setTheCough(cough);
+            }}
+            existingCough={theCough}
+          />
+        );
+      case 2:
+        return (
+          <Xray
+            xray={(xray) => {
+              setTheXray(xray);
+            }}
+            existingXray={theXray}
+          />
+        );
+      default:
+        return "Unknown step";
+    }
+  }
 
   // const isStepOptional = (step) => {
   //   return step === 1;
@@ -122,7 +147,55 @@ export default function NewDiagnosis(props) {
     //   newSkipped.delete(activeStep);
     // }
 
+    // Temperature
+    if (activeStep === 0) {
+      console.log(theTemp);
+    }
+
+    // Cough
+    if (activeStep === 1) {
+      console.log(theCough);
+    }
+
+    // Finish
+    if (activeStep === 2) {
+      console.log(theTemp);
+      console.log(theCough);
+      console.log(theXray);
+
+      // do the server push
+
+      const data = new FormData();
+      data.append("audio", theXray);
+      data.append("xray", theCough);
+      data.append("data", JSON.stringify({ temperature: parseFloat(theTemp) }));
+
+      axios
+        .post(
+          `http://127.0.0.1:8000/api/users/${localStorage.getItem(
+            "userId"
+          )}/diagnoses/`,
+          data,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Token ${localStorage.getItem("token")}`,
+            },
+          }
+        )
+        .then((response) => {
+          console.log(response);
+        })
+        .catch((err) => {
+          console.log(err.response);
+        });
+
+      setTheXray(null);
+      setTheCough(null);
+      setTheTemp(0);
+    }
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
+
     // setSkipped(newSkipped);
   };
 
@@ -182,7 +255,7 @@ export default function NewDiagnosis(props) {
           {/* <Typography gutterBottom>This is a gutter</Typography> */}
           {activeStep === steps.length ? (
             <div>
-              <Checkmark size="80" />
+              <Checkmark size={80} />
               <Typography className={classes.instructions}>
                 All steps completed - you&apos;re finished
               </Typography>

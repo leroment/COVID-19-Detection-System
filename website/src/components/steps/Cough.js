@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import coughLogo from "../../assets/cough.png";
-import { IconButton, Grid, Button } from "@material-ui/core";
-import { ReactMic } from "react-mic";
+import { IconButton, Grid, Button, TextField } from "@material-ui/core";
+import { ReactMic } from "@cleandersonlobo/react-mic";
 import { makeStyles } from "@material-ui/core/styles";
 import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord";
 import BackgroundImage from "../../assets/audio.png";
@@ -26,22 +26,33 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Cough(props) {
+export default function Cough({ cough, existingCough }) {
   const classes = useStyles();
 
   const [record, setRecord] = useState(false);
-  const [recordedBlob, setRecordedBlob] = useState("");
+  const [blob, setBlob] = useState(
+    existingCough !== null ? existingCough : null
+  );
   const [count, setCount] = useState(20);
+
+  useEffect(() => {
+    cough(blob);
+    return () => {};
+  }, [blob, cough]);
 
   const onStop = (recordedBlob) => {
     setRecord(false);
-    console.log("recordedBlob is: ", recordedBlob);
-    setRecordedBlob(recordedBlob.blobURL);
+    // console.log("recordedBlob is: ", recordedBlob);
+    setBlob(recordedBlob);
   };
+
+  // const onData = (recordedBlob) => {
+  //   console.log("The onData is:" + recordedBlob);
+  // };
 
   const clickRecord = () => {
     setRecord(true);
-    setRecordedBlob("");
+    setBlob(null);
 
     var interval = setInterval(() => {
       setCount((prev) => (prev = prev - 1));
@@ -79,6 +90,7 @@ export default function Cough(props) {
           record={record}
           className={classes.soundWave}
           onStop={onStop}
+          // onData={onData}
           strokeColor="#333333"
           backgroundColor="white"
         />
@@ -114,15 +126,47 @@ export default function Cough(props) {
             <audio
               controls
               controlsList="nodownload"
-              src={recordedBlob}
+              src={blob != null ? blob.blobURL : null}
             ></audio>
           </Grid>
-          <Grid item>
-            or&nbsp;&nbsp;&nbsp;
-            <Button variant="contained" component="label" disabled={record}>
-              Upload File
-              <input type="file" style={{ display: "none" }} />
-            </Button>
+          <Grid
+            container
+            direction="column"
+            spacing={2}
+            justify="center"
+            alignItems="center"
+          >
+            <Grid item>
+              <TextField
+                disabled
+                id="outlined-disabled"
+                label="File"
+                variant="outlined"
+                value={
+                  blob == null
+                    ? ""
+                    : blob.name == null
+                    ? blob.blobURL
+                    : blob.name
+                }
+              />
+            </Grid>
+            <Grid item>
+              or&nbsp;&nbsp;&nbsp;
+              <Button variant="contained" component="label" disabled={record}>
+                Upload File
+                <input
+                  type="file"
+                  id="audio"
+                  name="audio"
+                  accept="audio/wav"
+                  style={{ display: "none" }}
+                  onChange={(event) => {
+                    setBlob(event.target.files[0]);
+                  }}
+                />
+              </Button>
+            </Grid>
           </Grid>
         </Grid>
       </Grid>
