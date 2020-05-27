@@ -53,22 +53,27 @@ class UserDiagnosisViewSet(viewsets.ModelViewSet):
         except TypeError:
             validation_errors['data'] = 'Must be JSON'
 
-        audio_data = request.FILES.get('audio')
-        xray_data = request.FILES.get('xray')
+        audio_file = request.FILES.get('audio')
+        xray_file = request.FILES.get('xray')
         user_id = int(self.kwargs['user_pk'])
 
+        audio_data = None
+        xray_data = None
 
         # Check audio is WAV
-        if audio_data:
-            audio_mime = magic.from_buffer(audio_data.read(), mime=True)
+        if audio_file:
+            audio_data = audio_file.read()
+            audio_mime = magic.from_buffer(audio_data, mime=True)
             if audio_mime not in ['audio/x-wav', 'audio/wav']:
                 validation_errors['audio'] = 'Audio must be in WAV format'
         else:
             validation_errors['audio'] = 'Audio required'
 
         # Check xray is PNG
-        if xray_data:
-            xray_mime = magic.from_buffer(xray_data.read(), mime=True)
+        if xray_file:
+            xray_data = xray_file.read()
+            logger.info(xray_data)
+            xray_mime = magic.from_buffer(xray_data, mime=True)
             if xray_mime != 'image/png':
                 validation_errors['xray'] = 'Xray must be a PNG image'
 
@@ -90,12 +95,12 @@ class UserDiagnosisViewSet(viewsets.ModelViewSet):
         )
         audio = AudioRecording.objects.create(
             diagnosis=diagnosis,
-            file=audio_data.read(),
+            file=audio_data,
         )
         if xray_data:
             xray = XrayImage.objects.create(
                 diagnosis=diagnosis,
-                file=xray_data.read(),
+                file=xray_data,
             )
 
         response_data = {
