@@ -166,8 +166,8 @@ export default function NewDiagnosis(props) {
       // do the server push
 
       const data = new FormData();
-      data.append("audio", theXray);
-      data.append("xray", theCough);
+      data.append("xray", theXray);
+      data.append("audio", theCough.blob);
       data.append("data", JSON.stringify({ temperature: parseFloat(theTemp) }));
 
       axios

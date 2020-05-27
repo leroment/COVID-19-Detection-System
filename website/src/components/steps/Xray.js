@@ -45,7 +45,7 @@ export default function Xray({ xray, existingXray }) {
                 accept="image/png"
                 style={{ display: "none" }}
                 onChange={(event) => {
-                  setXrayData(new Blob(event.target.files[0]));
+                  setXrayData(event.target.files[0]);
                 }}
               />
             </Button>
