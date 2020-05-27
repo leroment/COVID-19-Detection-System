@@ -33,6 +33,7 @@ export default function Cough({ cough, existingCough }) {
   const [blob, setBlob] = useState(
     existingCough !== null ? existingCough : null
   );
+  const [blobURL, setblobURL] = useState("");
   const [count, setCount] = useState(20);
 
   useEffect(() => {
@@ -43,7 +44,8 @@ export default function Cough({ cough, existingCough }) {
   const onStop = (recordedBlob) => {
     setRecord(false);
     // console.log("recordedBlob is: ", recordedBlob);
-    setBlob(recordedBlob);
+    setblobURL(recordedBlob.blobURL);
+    setBlob(recordedBlob.blob);
   };
 
   // const onData = (recordedBlob) => {
@@ -126,7 +128,7 @@ export default function Cough({ cough, existingCough }) {
             <audio
               controls
               controlsList="nodownload"
-              src={blob != null ? blob.blobURL : null}
+              src={blobURL != null ? blobURL : null}
             ></audio>
           </Grid>
           <Grid
@@ -142,13 +144,7 @@ export default function Cough({ cough, existingCough }) {
                 id="outlined-disabled"
                 label="File"
                 variant="outlined"
-                value={
-                  blob == null
-                    ? ""
-                    : blob.name == null
-                    ? blob.blobURL
-                    : blob.name
-                }
+                value={blob == null ? "" : blob.name == null ? "" : blob.name}
               />
             </Grid>
             <Grid item>
