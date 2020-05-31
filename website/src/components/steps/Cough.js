@@ -42,7 +42,6 @@ export default function Cough({ cough, existingCough }) {
   }, [blob, cough]);
 
   const onStop = (recordedBlob) => {
-    setRecord(false);
     // console.log("recordedBlob is: ", recordedBlob);
     setblobURL(recordedBlob.blobURL);
     setBlob(recordedBlob.blob);
