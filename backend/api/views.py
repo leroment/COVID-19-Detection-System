@@ -7,11 +7,12 @@ from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.exceptions import ValidationError
+from django.db.models import Count, Q
 import json
 import magic
 
 from .serializers import UserSerializer, UserValidationSerializer, DiagnosisSerializer, XraySerializer, AudioSerializer, TemperatureSerializer
-from .models import Diagnosis, TemperatureReading, AudioRecording, XrayImage
+from .models import Diagnosis, TemperatureReading, AudioRecording, XrayImage, DiagnosisStatus
 
 import logging
 
@@ -72,7 +73,6 @@ class UserDiagnosisViewSet(viewsets.ModelViewSet):
         # Check xray is PNG
         if xray_file:
             xray_data = xray_file.read()
-            logger.info(xray_data)
             xray_mime = magic.from_buffer(xray_data, mime=True)
             if xray_mime != 'image/png':
                 validation_errors['xray'] = 'Xray must be a PNG image'
@@ -85,9 +85,20 @@ class UserDiagnosisViewSet(viewsets.ModelViewSet):
         if validation_errors:
             raise ValidationError(validation_errors)
 
+        # Get health officer with the least cases waiting to be reviewed
+        health_officer = (
+            User.objects
+            .filter(is_staff=True)
+            .annotate(diagnosis_count=Count('health_officer_diagnoses', filter=~Q(health_officer_diagnoses__status=DiagnosisStatus.REVIEWED)))  # include waiting, processing and awaiting review diagnoses
+            .order_by('diagnosis_count')
+            .first()
+        )
+
         # Create items in database
         diagnosis = Diagnosis.objects.create(
             user_id=user_id,
+            status=DiagnosisStatus.WAITING,
+            health_officer=health_officer,
         )
         temperature = TemperatureReading.objects.create(
             diagnosis=diagnosis,
