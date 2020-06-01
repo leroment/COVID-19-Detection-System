@@ -3,6 +3,7 @@ import "./App.css";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import Dashboard from "./components/Dashboard";
+import Diagnosis from "./components/Diagnosis";
 import { Container } from "@material-ui/core";
 import {
   BrowserRouter as Router,
@@ -49,6 +50,7 @@ function App() {
           <UnPrivateRoute exact path="/" component={Login} />
           <UnPrivateRoute path="/register" component={Register} />
           <PrivateRoute path="/dashboard" component={Dashboard} />
+          <PrivateRoute path="/diagnosis/:diagnosisId" component={Diagnosis} />
         </Switch>
       </Container>
     </Router>

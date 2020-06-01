@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Link as RouterLink } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import Menubar from "./Menubar";
 import {
@@ -14,6 +15,7 @@ import {
   Card,
   CardHeader,
   CardContent,
+  Link,
 } from "@material-ui/core";
 import { grey } from "@material-ui/core/colors";
 import NewDiagnosis from "./NewDiagnosis";
@@ -47,16 +49,16 @@ const useStyles = makeStyles({
   },
 });
 
-function createData(diagnosisId, healthOfficer, status, dateSubmitted) {
-  return { diagnosisId, healthOfficer, status, dateSubmitted };
-}
+// function createData(diagnosisId, healthOfficer, status, dateSubmitted) {
+//   return { diagnosisId, healthOfficer, status, dateSubmitted };
+// }
 
-const rows = [
-  // createData("342341233124", "Steve Jobs", "Pending", "12/05/2020"),
-  // createData("342341233124", "Bill Gates", "Pending", "03/02/2020"),
-  // createData("342341233126", "Steve Balmer", "Result Ready", "14/03/2020"),
-  // createData("123323124423", "Steve Wozniak", "Submitted", "12/05/2020"),
-];
+// const rows = [
+//   // createData("342341233124", "Steve Jobs", "Pending", "12/05/2020"),
+//   // createData("342341233124", "Bill Gates", "Pending", "03/02/2020"),
+//   // createData("342341233126", "Steve Balmer", "Result Ready", "14/03/2020"),
+//   // createData("123323124423", "Steve Wozniak", "Submitted", "12/05/2020"),
+// ];
 
 export default function Dashboard() {
   const classes = useStyles();
@@ -186,7 +188,12 @@ export default function Dashboard() {
                   {diagnoses.map((diagnosis, index) => (
                     <TableRow key={index}>
                       <TableCell component="th" scope="row">
-                        {diagnosis.id}
+                        <Link
+                          component={RouterLink}
+                          to={`/diagnosis/${diagnosis.id}`}
+                        >
+                          {diagnosis.id}
+                        </Link>
                       </TableCell>
                     </TableRow>
                   ))}
