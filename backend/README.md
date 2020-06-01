@@ -174,6 +174,14 @@ Authorization: Token <authtoken>
     {
         "id": <number>,
         "user": <user id>,
+        "status": "<WAITING | PROCESSING | AWAITING_REVIEW | REVIEWED>",
+        "health_officer": {
+            "id": <health officer user id>,
+            "first_name": "<name>",
+            "last_name": "<name>",
+        }
+        "last_update": "2020-06-01T01:37:32.471454Z",
+        "creation_date": "2020-06-01T01:37:32.471454Z",
         "temperaturereadings": [{
             "id": <number>,
             "reading": <number>
@@ -212,6 +220,14 @@ Authorization: Token <authtoken>
 {
     "id": <number>,
     "user": <user id>,
+    "status": "<WAITING | PROCESSING | AWAITING_REVIEW | REVIEWED>",
+    "health_officer": {
+        "id": <health officer user id>,
+        "first_name": "<name>",
+        "last_name": "<name>",
+    }
+    "last_update": "2020-06-01T01:37:32.471454Z",
+    "creation_date": "2020-06-01T01:37:32.471454Z",
     "temperaturereadings": [{
         "id": <number>,
         "reading": <number>
