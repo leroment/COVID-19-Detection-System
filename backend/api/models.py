@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 # User from django.contrib.auth.models
 
 class DiagnosisStatus(models.TextChoices):
+    NEEDS_DATA = 'ND', "NEEDS_DATA"
     WAITING = 'WA', "WAITING"
     PROCESSING = 'PR', "PROCESSING"
     AWAITING_REVIEW = 'AR', "AWAITING_REVIEW"
@@ -36,3 +37,12 @@ class AudioRecording(models.Model):
 class XrayImage(models.Model):
     diagnosis = models.ForeignKey(Diagnosis, on_delete=models.CASCADE)
     file = models.BinaryField()
+
+
+class DiagnosisResult(models.Model):
+    diagnosis = models.ForeignKey(Diagnosis, on_delete=models.CASCADE)
+    approved = models.BooleanField()
+    confidence = models.FloatField()
+    has_covid = models.BooleanField()
+    creation_date = models.DateTimeField(auto_now_add=True)
+    last_update = models.DateTimeField(auto_now=True)

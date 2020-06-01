@@ -1,6 +1,9 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from .models import Diagnosis, XrayImage, AudioRecording, TemperatureReading, DiagnosisStatus
+from .models import (
+    Diagnosis, XrayImage, AudioRecording, TemperatureReading,
+    DiagnosisStatus, DiagnosisResult
+)
 
 import logging
 
@@ -39,6 +42,19 @@ class CutDownHealthOfficerSerializer(serializers.ModelSerializer):
         fields = ['id', 'first_name', 'last_name']
 
 
+class DiagnosisResultSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DiagnosisResult
+        fields = [
+            'diagnosis',
+            'approved',
+            'confidence',
+            'has_covid',
+            'creation_date',
+            'last_update',
+        ]
+
+
 class DiagnosisSerializer(serializers.ModelSerializer):
     temperaturereadings = TemperatureSerializer(many=True, source='temperaturereading_set', read_only=True)
     audiorecordings = AudioSerializer(many=True, source='audiorecording_set', read_only=True)
@@ -46,9 +62,17 @@ class DiagnosisSerializer(serializers.ModelSerializer):
 
     health_officer = CutDownHealthOfficerSerializer()
     status = serializers.SerializerMethodField('get_status_label')
+    result = serializers.SerializerMethodField('get_result')
 
     def get_status_label(self, obj):
         return DiagnosisStatus(obj.status).label
+
+    def get_result(self, obj):
+        latest_result = DiagnosisResult.objects.filter(diagnosis=obj).order_by('last_update').last()
+        if latest_result:
+            return DiagnosisResultSerializer(latest_result).data
+        else:
+            return None
 
     class Meta:
         model = Diagnosis
@@ -62,4 +86,5 @@ class DiagnosisSerializer(serializers.ModelSerializer):
             'temperaturereadings',
             'audiorecordings',
             'xrayimages',
+            'result',
         ]

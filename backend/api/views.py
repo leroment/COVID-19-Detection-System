@@ -12,7 +12,7 @@ import json
 import magic
 
 from .serializers import UserSerializer, UserValidationSerializer, DiagnosisSerializer, XraySerializer, AudioSerializer, TemperatureSerializer
-from .models import Diagnosis, TemperatureReading, AudioRecording, XrayImage, DiagnosisStatus
+from .models import Diagnosis, TemperatureReading, AudioRecording, XrayImage, DiagnosisStatus, DiagnosisResult
 
 import logging
 
@@ -25,6 +25,14 @@ class UserOnly(BasePermission):
     def has_permission(self, request, view):
         user_id = int(request.resolver_match.kwargs['user_pk'])
         return request.user.id == user_id
+
+
+class HealthOfficerOnly(BasePermission):
+    message = 'Not a health officer'
+
+    def has_permission(self, request, view):
+        healthofficer_id = int(request.resolver_match.kwargs['healthofficer_pk'])
+        return request.user.is_staff and request.user.id == healthofficer_id
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -124,6 +132,51 @@ class UserDiagnosisViewSet(viewsets.ModelViewSet):
             response_data['xray_id'] = xray.id
 
         return Response(response_data, status=status.HTTP_201_CREATED)
+
+
+class HealthOfficerViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = User.objects.filter(is_staff=True)
+    serializer_class = UserSerializer
+
+
+class HealthOfficerDiagnosisViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = (IsAuthenticated, HealthOfficerOnly)
+    serializer_class = DiagnosisSerializer
+
+    def get_queryset(self):
+        status_filter = self.request.query_params.get('status', None)
+
+        user_id = int(self.kwargs['healthofficer_pk'])
+        qs = Diagnosis.objects.filter(health_officer=user_id)
+        try:
+            if status_filter:
+                qs = qs.filter(status=DiagnosisStatus[status_filter])
+        except KeyError:
+            raise ValidationError({'status': status_filter + ' is not a valid status'})
+        return qs
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.status != DiagnosisStatus.AWAITING_REVIEW:
+            raise ValidationError('Diagnosis not awaiting review')
+
+        approved = request.data.get('approved')
+        if approved is None:
+            raise ValidationError({'approved': 'Required'})
+        if type(approved) != bool:
+            raise ValidationError({'approved': 'Must be a boolean'})
+        if approved:
+            instance.status = DiagnosisStatus.REVIEWED
+        else:
+            instance.status = DiagnosisStatus.NEEDS_DATA
+        instance.save()
+
+        latest_result = DiagnosisResult.objects.filter(diagnosis=instance).order_by('last_update').last()
+        latest_result.approved = True
+        latest_result.save()
+
+        return Response(self.serializer_class(instance).data)
+
 
 
 class XrayViewSet(viewsets.ReadOnlyModelViewSet):
