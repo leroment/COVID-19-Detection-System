@@ -7,11 +7,12 @@ from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.exceptions import ValidationError
+from django.db.models import Count, Q
 import json
 import magic
 
 from .serializers import UserSerializer, UserValidationSerializer, DiagnosisSerializer, XraySerializer, AudioSerializer, TemperatureSerializer
-from .models import Diagnosis, TemperatureReading, AudioRecording, XrayImage
+from .models import Diagnosis, TemperatureReading, AudioRecording, XrayImage, DiagnosisStatus
 
 import logging
 
@@ -53,22 +54,26 @@ class UserDiagnosisViewSet(viewsets.ModelViewSet):
         except TypeError:
             validation_errors['data'] = 'Must be JSON'
 
-        audio_data = request.FILES.get('audio')
-        xray_data = request.FILES.get('xray')
+        audio_file = request.FILES.get('audio')
+        xray_file = request.FILES.get('xray')
         user_id = int(self.kwargs['user_pk'])
 
+        audio_data = None
+        xray_data = None
 
         # Check audio is WAV
-        if audio_data:
-            audio_mime = magic.from_buffer(audio_data.read(), mime=True)
+        if audio_file:
+            audio_data = audio_file.read()
+            audio_mime = magic.from_buffer(audio_data, mime=True)
             if audio_mime not in ['audio/x-wav', 'audio/wav']:
                 validation_errors['audio'] = 'Audio must be in WAV format'
         else:
             validation_errors['audio'] = 'Audio required'
 
         # Check xray is PNG
-        if xray_data:
-            xray_mime = magic.from_buffer(xray_data.read(), mime=True)
+        if xray_file:
+            xray_data = xray_file.read()
+            xray_mime = magic.from_buffer(xray_data, mime=True)
             if xray_mime != 'image/png':
                 validation_errors['xray'] = 'Xray must be a PNG image'
 
@@ -80,9 +85,20 @@ class UserDiagnosisViewSet(viewsets.ModelViewSet):
         if validation_errors:
             raise ValidationError(validation_errors)
 
+        # Get health officer with the least cases waiting to be reviewed
+        health_officer = (
+            User.objects
+            .filter(is_staff=True)
+            .annotate(diagnosis_count=Count('health_officer_diagnoses', filter=~Q(health_officer_diagnoses__status=DiagnosisStatus.REVIEWED)))  # include waiting, processing and awaiting review diagnoses
+            .order_by('diagnosis_count')
+            .first()
+        )
+
         # Create items in database
         diagnosis = Diagnosis.objects.create(
             user_id=user_id,
+            status=DiagnosisStatus.WAITING,
+            health_officer=health_officer,
         )
         temperature = TemperatureReading.objects.create(
             diagnosis=diagnosis,
@@ -90,12 +106,12 @@ class UserDiagnosisViewSet(viewsets.ModelViewSet):
         )
         audio = AudioRecording.objects.create(
             diagnosis=diagnosis,
-            file=audio_data.read(),
+            file=audio_data,
         )
         if xray_data:
             xray = XrayImage.objects.create(
                 diagnosis=diagnosis,
-                file=xray_data.read(),
+                file=xray_data,
             )
 
         response_data = {
