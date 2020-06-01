@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from .models import Diagnosis, XrayImage, AudioRecording, TemperatureReading
+from .models import Diagnosis, XrayImage, AudioRecording, TemperatureReading, DiagnosisStatus
 
 import logging
 
@@ -33,16 +33,32 @@ class XraySerializer(serializers.ModelSerializer):
         fields = ['id']
 
 
+class CutDownHealthOfficerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'first_name', 'last_name']
+
+
 class DiagnosisSerializer(serializers.ModelSerializer):
     temperaturereadings = TemperatureSerializer(many=True, source='temperaturereading_set', read_only=True)
     audiorecordings = AudioSerializer(many=True, source='audiorecording_set', read_only=True)
     xrayimages = XraySerializer(many=True, source='xrayimage_set', read_only=True)
 
+    health_officer = CutDownHealthOfficerSerializer()
+    status = serializers.SerializerMethodField('get_status_label')
+
+    def get_status_label(self, obj):
+        return DiagnosisStatus(obj.status).label
+
     class Meta:
         model = Diagnosis
         fields = [
             'id',
+            'status',
             'user',
+            'health_officer',
+            'creation_date',
+            'last_update',
             'temperaturereadings',
             'audiorecordings',
             'xrayimages',
