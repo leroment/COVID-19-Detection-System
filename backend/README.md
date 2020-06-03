@@ -425,3 +425,33 @@ Authorization: Token <authtoken>
 403 Bad Request
 ["Diagnosis not awaiting review"]
 ```
+
+
+
+### Get statistics counts
+Get counts of various interesting statistics.
+
+##### Format
+```json
+GET /api/stats/
+```
+
+#### Responses
+##### Successful response:
+```json
+200 OK
+{
+    "active_users": 1,
+    "total_diagnoses": 2,
+    "total_reviewed_diagnoses": 1,
+    "total_infected": 1
+}
+```
+
+*Description*
+```json
+active_users: count of users with a submitted diagnosis
+total_diagnoses: count of diagnoses with any status
+total_reviewed_diagnoses: count of diagnoses with REVIEWED status
+total_infected: count of users with a positive COVID-19 diagnosis
+```
