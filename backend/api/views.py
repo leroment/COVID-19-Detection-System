@@ -204,6 +204,22 @@ class TemperatureViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = TemperatureSerializer
 
 
+class StatsView(APIView):
+    def get(self, request):
+        total_active_users = Diagnosis.objects.values('user').distinct().count()
+        total_diagnoses = Diagnosis.objects.count()
+        total_reviewed_diagnoses = Diagnosis.objects.filter(status=DiagnosisStatus.REVIEWED).count()
+        total_infected = Diagnosis.objects.filter(status=DiagnosisStatus.REVIEWED).filter(diagnosisresult__has_covid=True).values('user').distinct().count()
+        return Response({
+            'active_users': total_active_users,
+            'total_diagnoses': total_diagnoses,
+            'total_reviewed_diagnoses': total_reviewed_diagnoses,
+            'total_infected': total_infected,
+        })
+
+        # infected = diagnoses with a diagnosis result with has_covid = true, with unique user
+
+
 class LoginView(APIView):
     def post(self, request):
         user = authenticate(username=request.data.get('email'), password=request.data.get('password'))

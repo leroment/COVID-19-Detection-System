@@ -4,7 +4,8 @@ from rest_framework_nested import routers
 from .views import (
     UserViewSet, DiagnosisViewSet, UserDiagnosisViewSet, RegisterView, LoginView,
     XrayViewSet, AudioViewSet, TemperatureViewSet, HealthOfficerViewSet,
-    HealthOfficerDiagnosisViewSet
+    HealthOfficerDiagnosisViewSet,
+    StatsView
 )
 
 
@@ -26,6 +27,7 @@ healthofficers_router.register(r'diagnoses', HealthOfficerDiagnosisViewSet, base
 urlpatterns = [
     url(r'login', LoginView.as_view()),
     url(r'register', RegisterView.as_view()),
+    url(r'stats', StatsView.as_view()),
     url(r'^', include(router.urls)),
     url(r'^', include(users_router.urls)),
     url(r'^', include(healthofficers_router.urls)),
