@@ -10,6 +10,7 @@ from rest_framework.exceptions import ValidationError
 from django.db.models import Count, Q
 import json
 import magic
+from datetime import datetime
 
 from .serializers import UserSerializer, UserValidationSerializer, DiagnosisSerializer, XraySerializer, AudioSerializer, TemperatureSerializer
 from .models import Diagnosis, TemperatureReading, AudioRecording, XrayImage, DiagnosisStatus, DiagnosisResult
@@ -210,11 +211,22 @@ class StatsView(APIView):
         total_diagnoses = Diagnosis.objects.count()
         total_reviewed_diagnoses = Diagnosis.objects.filter(status=DiagnosisStatus.REVIEWED).count()
         total_infected = Diagnosis.objects.filter(status=DiagnosisStatus.REVIEWED).filter(diagnosisresult__has_covid=True).values('user').distinct().count()
+
+        last_infected_diagnosis = (
+            Diagnosis.objects
+            .filter(status=DiagnosisStatus.REVIEWED)
+            .filter(diagnosisresult__has_covid=True)
+            .order_by('-creation_date')
+            .first()
+        )
+        time_since_infected = datetime.now() - last_infected_diagnosis.creation_date.replace(tzinfo=None)
+
         return Response({
             'active_users': total_active_users,
             'total_diagnoses': total_diagnoses,
             'total_reviewed_diagnoses': total_reviewed_diagnoses,
             'total_infected': total_infected,
+            'seconds_since_positive': int(time_since_infected.total_seconds()),
         })
 
         # infected = diagnoses with a diagnosis result with has_covid = true, with unique user
