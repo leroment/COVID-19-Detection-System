@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState} from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Menubar from "./Menubar";
 import {
@@ -13,6 +13,7 @@ import {
   Card,
   CardHeader,
   CardContent,
+  Typography,
 } from "@material-ui/core";
 import { grey } from "@material-ui/core/colors";
 import NewDiagnosis from "./NewDiagnosis";
@@ -60,6 +61,7 @@ const rows = [
 export default function Dashboard() {
   const classes = useStyles();
   const [open, setOpen] = useState(false);
+  const [count, setCount] = useState(0);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -67,6 +69,10 @@ export default function Dashboard() {
 
   const callback = (value) => {
     setOpen(false);
+  };
+
+  const diagnosisCount = () => {
+    setCount (count => count + 1);
   };
 
   return (
@@ -87,19 +93,33 @@ export default function Dashboard() {
           alignItems="center"
           spacing={3}
         >
-          <Grid item>
+          <Grid item>                 
+          <Card className={classes.card}>
+          <CardContent>         
+          <Typography component="h5" variant="h5" align="center">
+            Number of People Diagnosed
+          <p>{count}</p>
+          </Typography> 
+          </CardContent>
+          </Card>
+          </Grid>
+          
+            <Grid item>
             <Card className={classes.card}>
-              <CardContent></CardContent>
+              <CardContent>
+              <Typography component="h5" variant="h5" align="center">
+               Number of People Infected 
+               <p></p>             
+               </Typography>  
+              </CardContent>
             </Card>
           </Grid>
           <Grid item>
             <Card className={classes.card}>
-              <CardContent></CardContent>
-            </Card>
-          </Grid>
-          <Grid item>
-            <Card className={classes.card}>
-              <CardContent></CardContent>
+          <CardContent>
+          <Typography component="h5" variant="h5" align="center">
+           Ratio 
+          </Typography> </CardContent>
             </Card>
           </Grid>
         </Grid>
@@ -118,7 +138,7 @@ export default function Dashboard() {
                   New Diagnosis +
                 </Button>
               }
-              title="Current Diagnoses"
+              title="Current Diagnosis"
             />
             <NewDiagnosis open={open} parentCallback={callback} />
             <Divider />
