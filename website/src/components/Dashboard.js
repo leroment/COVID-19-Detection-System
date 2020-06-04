@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 import React, { useState} from "react";
+=======
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+>>>>>>> master
 import { makeStyles } from "@material-ui/core/styles";
 import Menubar from "./Menubar";
 import {
@@ -52,16 +57,40 @@ function createData(diagnosisId, healthOfficer, status, dateSubmitted) {
 }
 
 const rows = [
-  createData("342341233124", "Steve Jobs", "Pending", "12/05/2020"),
-  createData("342341233124", "Bill Gates", "Pending", "03/02/2020"),
-  createData("342341233126", "Steve Balmer", "Result Ready", "14/03/2020"),
-  createData("123323124423", "Steve Wozniak", "Submitted", "12/05/2020"),
+  // createData("342341233124", "Steve Jobs", "Pending", "12/05/2020"),
+  // createData("342341233124", "Bill Gates", "Pending", "03/02/2020"),
+  // createData("342341233126", "Steve Balmer", "Result Ready", "14/03/2020"),
+  // createData("123323124423", "Steve Wozniak", "Submitted", "12/05/2020"),
 ];
 
 export default function Dashboard() {
   const classes = useStyles();
   const [open, setOpen] = useState(false);
+<<<<<<< HEAD
   const [count, setCount] = useState(0);
+=======
+  const [diagnoses, setDiagnoses] = useState([]);
+
+  useEffect(() => {
+    axios
+      .get(
+        `http://127.0.0.1:8000/api/users/${localStorage.getItem(
+          "userId"
+        )}/diagnoses/`,
+        {
+          headers: {
+            Authorization: `Token ${localStorage.getItem("token")}`,
+          },
+        }
+      )
+      .then((response) => {
+        setDiagnoses(response.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
+>>>>>>> master
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -69,6 +98,24 @@ export default function Dashboard() {
 
   const callback = (value) => {
     setOpen(false);
+
+    axios
+      .get(
+        `http://127.0.0.1:8000/api/users/${localStorage.getItem(
+          "userId"
+        )}/diagnoses/`,
+        {
+          headers: {
+            Authorization: `Token ${localStorage.getItem("token")}`,
+          },
+        }
+      )
+      .then((response) => {
+        setDiagnoses(response.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   const diagnosisCount = () => {
@@ -147,13 +194,13 @@ export default function Dashboard() {
                 <TableHead>
                   <TableRow>
                     <TableCell>Diagnosis ID</TableCell>
-                    <TableCell>Health Officer Assigned</TableCell>
+                    {/* <TableCell>Health Officer Assigned</TableCell>
                     <TableCell>Status</TableCell>
-                    <TableCell>Date Submitted</TableCell>
+                    <TableCell>Date Submitted</TableCell> */}
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {rows.map((row, index) => (
+                  {/* {rows.map((row, index) => (
                     <TableRow key={index}>
                       <TableCell component="th" scope="row">
                         {row.diagnosisId}
@@ -161,6 +208,13 @@ export default function Dashboard() {
                       <TableCell align="left">{row.healthOfficer}</TableCell>
                       <TableCell align="left">{row.status}</TableCell>
                       <TableCell align="left">{row.dateSubmitted}</TableCell>
+                    </TableRow>
+                  ))} */}
+                  {diagnoses.map((diagnosis, index) => (
+                    <TableRow key={index}>
+                      <TableCell component="th" scope="row">
+                        {diagnosis.id}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

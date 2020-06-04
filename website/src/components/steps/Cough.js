@@ -1,10 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import coughLogo from "../../assets/cough.png";
-import { IconButton, Grid, Button } from "@material-ui/core";
-import { ReactMic } from "react-mic";
+import { IconButton, Grid, Button, TextField } from "@material-ui/core";
+import { ReactMic } from "@cleandersonlobo/react-mic";
 import { makeStyles } from "@material-ui/core/styles";
 import FiberManualRecordIcon from "@material-ui/icons/FiberManualRecord";
-import StopIcon from "@material-ui/icons/Stop";
 import BackgroundImage from "../../assets/audio.png";
 
 const useStyles = makeStyles((theme) => ({
@@ -27,26 +26,43 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Cough() {
+export default function Cough({ cough, existingCough }) {
   const classes = useStyles();
 
   const [record, setRecord] = useState(false);
-  const [recordedBlob, setRecordedBlob] = useState("");
+  const [blob, setBlob] = useState(
+    existingCough !== null ? existingCough : null
+  );
+  const [blobURL, setblobURL] = useState("");
+  const [count, setCount] = useState(20);
+
+  useEffect(() => {
+    cough(blob);
+    return () => {};
+  }, [blob, cough]);
 
   const onStop = (recordedBlob) => {
-    console.log("recordedBlob is: ", recordedBlob);
-    setRecordedBlob(recordedBlob.blobURL);
+    // console.log("recordedBlob is: ", recordedBlob);
+    setblobURL(recordedBlob.blobURL);
+    setBlob(recordedBlob.blob);
   };
 
   // const onData = (recordedBlob) => {
-  //   console.log("chunk of real-time data is: ", recordedBlob);
+  //   console.log("The onData is:" + recordedBlob);
   // };
 
   const clickRecord = () => {
-    setRecord(!record);
+    setRecord(true);
+    setBlob(null);
+
+    var interval = setInterval(() => {
+      setCount((prev) => (prev = prev - 1));
+    }, 1000);
 
     setTimeout(() => {
+      clearInterval(interval);
       setRecord(false);
+      setCount(20);
     }, 21000);
   };
 
@@ -75,6 +91,7 @@ export default function Cough() {
           record={record}
           className={classes.soundWave}
           onStop={onStop}
+          // onData={onData}
           strokeColor="#333333"
           backgroundColor="white"
         />
@@ -89,36 +106,62 @@ export default function Cough() {
           spacing={2}
         >
           <Grid item>
-            <IconButton
-              aria-label="record"
-              color="secondary"
-              onClick={clickRecord}
-              style={{ backgroundColor: "grey" }}
-              size="medium"
-            >
-              {record ? (
-                <StopIcon fontSize="inherit" style={{ fill: "white" }} />
-              ) : (
+            {record ? (
+              <React.Fragment>{count}</React.Fragment>
+            ) : (
+              <IconButton
+                aria-label="record"
+                color="secondary"
+                onClick={clickRecord}
+                style={{ backgroundColor: "grey" }}
+                size="medium"
+              >
                 <FiberManualRecordIcon
                   fontSize="inherit"
                   style={{ fill: "white" }}
                 />
-              )}
-            </IconButton>
+              </IconButton>
+            )}
           </Grid>
           <Grid item>
             <audio
               controls
               controlsList="nodownload"
-              src={recordedBlob}
+              src={blobURL != null ? blobURL : null}
             ></audio>
           </Grid>
-          <Grid item>
-            or&nbsp;&nbsp;&nbsp;
-            <Button variant="contained" component="label">
-              Upload File
-              <input type="file" style={{ display: "none" }} />
-            </Button>
+          <Grid
+            container
+            direction="column"
+            spacing={2}
+            justify="center"
+            alignItems="center"
+          >
+            <Grid item>
+              <TextField
+                disabled
+                id="outlined-disabled"
+                label="File"
+                variant="outlined"
+                value={blob == null ? "" : blob.name == null ? "" : blob.name}
+              />
+            </Grid>
+            <Grid item>
+              or&nbsp;&nbsp;&nbsp;
+              <Button variant="contained" component="label" disabled={record}>
+                Upload File
+                <input
+                  type="file"
+                  id="audio"
+                  name="audio"
+                  accept="audio/wav"
+                  style={{ display: "none" }}
+                  onChange={(event) => {
+                    setBlob(event.target.files[0]);
+                  }}
+                />
+              </Button>
+            </Grid>
           </Grid>
         </Grid>
       </Grid>
