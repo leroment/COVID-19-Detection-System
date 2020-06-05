@@ -79,6 +79,7 @@ export default function Dashboard() {
       )
       .then((response) => {
         setDiagnoses(response.data);
+        console.log(response.data);
       })
       .catch((err) => {
         console.log(err);
@@ -110,6 +111,26 @@ export default function Dashboard() {
         console.log(err);
       });
   };
+
+  function formatDate(date) {
+    let d = new Date(date);
+    var hours = d.getHours();
+    var minutes = d.getMinutes();
+    var ampm = hours >= 12 ? "pm" : "am";
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+    var strTime = hours + ":" + minutes + " " + ampm;
+    return (
+      d.getDate() +
+      "/" +
+      (d.getMonth() + 1) +
+      "/" +
+      d.getFullYear() +
+      "  " +
+      strTime
+    );
+  }
 
   return (
     <div className={classes.root}>
@@ -169,9 +190,9 @@ export default function Dashboard() {
                 <TableHead>
                   <TableRow>
                     <TableCell>Diagnosis ID</TableCell>
-                    {/* <TableCell>Health Officer Assigned</TableCell>
+                    <TableCell>Health Officer Assigned</TableCell>
                     <TableCell>Status</TableCell>
-                    <TableCell>Date Submitted</TableCell> */}
+                    <TableCell>Date Submitted</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -194,6 +215,14 @@ export default function Dashboard() {
                         >
                           {diagnosis.id}
                         </Link>
+                      </TableCell>
+                      <TableCell>
+                        {diagnosis.health_officer.first_name}{" "}
+                        {diagnosis.health_officer.last_name}
+                      </TableCell>
+                      <TableCell>{diagnosis.status}</TableCell>
+                      <TableCell>
+                        {formatDate(diagnosis.creation_date)}
                       </TableCell>
                     </TableRow>
                   ))}
