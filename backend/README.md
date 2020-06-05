@@ -197,6 +197,7 @@ Authorization: Token <authtoken>
             "approved": <bool>,
             "confidence": <float 0-1>,
             "has_covid": <bool>,
+            "comment": "<string>" or null,
             "creation_date": "2020-06-01T05:50:11.542754Z",
             "last_update":"2020-06-01T05:50:11.542754Z"
         }
@@ -251,6 +252,7 @@ Authorization: Token <authtoken>
         "approved": <bool>,
         "confidence": <float 0-1>,
         "has_covid": <bool>,
+        "comment": "<string>" or null,
         "creation_date": "2020-06-01T05:50:11.542754Z",
         "last_update":"2020-06-01T05:50:11.542754Z"
     }
@@ -349,6 +351,7 @@ REVIEWED
             "approved": <bool>,
             "confidence": <float 0-1>,
             "has_covid": <bool>,
+            "comment": "<string>" or null,
             "creation_date": "2020-06-01T05:50:11.542754Z",
             "last_update":"2020-06-01T05:50:11.542754Z"
         }
@@ -372,6 +375,11 @@ Approve or decline a diagnosis result as a Health Officer
 ```json
 PUT /api/healthofficers/<id>/diagnoses/<id>/
 Authorization: Token <authtoken>
+
+{
+    "approved": <bool>,
+    "comment": "<string>" or null,
+}
 ```
 
 #### Responses
@@ -405,6 +413,7 @@ Authorization: Token <authtoken>
             "approved": <bool>, // would be true
             "confidence": <float 0-1>,
             "has_covid": <bool>,
+            "comment": "<string>" or null,
             "creation_date": "2020-06-01T05:50:11.542754Z",
             "last_update":"2020-06-01T05:50:11.542754Z"
         }
