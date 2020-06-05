@@ -10,6 +10,9 @@ from rest_framework.exceptions import ValidationError
 from django.db.models import Count, Q
 import json
 import magic
+import subprocess
+import sys
+import os
 
 from .serializers import UserSerializer, UserValidationSerializer, DiagnosisSerializer, XraySerializer, AudioSerializer, TemperatureSerializer
 from .models import Diagnosis, TemperatureReading, AudioRecording, XrayImage, DiagnosisStatus, DiagnosisResult
@@ -93,6 +96,32 @@ class UserDiagnosisViewSet(viewsets.ModelViewSet):
         if validation_errors:
             raise ValidationError(validation_errors)
 
+        # Run Analysis Scripts
+        #run xray and sound detection
+        xray_out = subprocess.check_output(['python3', 'covid19_recognise_new.py', xray_file.temporary_file_path()])
+        soundfile_out = subprocess.check_output(['python3', 'coughdetect_new.py', audio_file.temporary_file_path()])
+        
+
+        # # outcome converted to string (Positive/Negative) xray comes with probability percentage
+        xray_string = xray_out.decode()
+        sound_string = soundfile_out.decode()
+
+        # #if != -1 it is positive
+        xray_outcome = xray_string.find("Positive")
+        sound_outcome = sound_string.find("Positive")
+
+        print ('Xray:' + xray_string)
+        print ('sound:' + sound_string)
+
+        print ('Xray:' + str(xray_outcome))
+        print ('sound:' + str(sound_outcome))
+
+        if (sound_outcome != -1):
+            sound_result = 'cough detected'
+        else:
+            sound_result = 'no cough detected'
+
+
         # Get health officer with the least cases waiting to be reviewed
         health_officer = (
             User.objects
@@ -126,6 +155,8 @@ class UserDiagnosisViewSet(viewsets.ModelViewSet):
             'id': diagnosis.id,
             'temperature_id': temperature.id,
             'audio_id': audio.id,
+            'xray_result': xray_string,
+            'audio_result': sound_result
         }
 
         if xray_data:
