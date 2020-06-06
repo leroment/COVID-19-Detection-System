@@ -50,6 +50,7 @@ class DiagnosisResultSerializer(serializers.ModelSerializer):
             'approved',
             'confidence',
             'has_covid',
+            'comment',
             'creation_date',
             'last_update',
         ]

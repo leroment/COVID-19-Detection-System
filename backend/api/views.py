@@ -206,11 +206,23 @@ class HealthOfficerDiagnosisViewSet(viewsets.ReadOnlyModelViewSet):
         if instance.status != DiagnosisStatus.AWAITING_REVIEW:
             raise ValidationError('Diagnosis not awaiting review')
 
+        validation_errors = {}
+
         approved = request.data.get('approved')
+        comment = request.data.get('comment')
+
         if approved is None:
-            raise ValidationError({'approved': 'Required'})
+            validation_errors['approved'] = 'Required'
         if type(approved) != bool:
-            raise ValidationError({'approved': 'Must be a boolean'})
+            validation_errors['approved'] = 'Must be a boolean'
+
+        if comment is not None:
+            if type(comment) != str:
+                validation_errors['comment'] = 'Must be a string'
+
+        if validation_errors:
+            raise ValidationError(validation_errors)
+
         if approved:
             instance.status = DiagnosisStatus.REVIEWED
         else:
@@ -219,6 +231,8 @@ class HealthOfficerDiagnosisViewSet(viewsets.ReadOnlyModelViewSet):
 
         latest_result = DiagnosisResult.objects.filter(diagnosis=instance).order_by('last_update').last()
         latest_result.approved = True
+        if comment:
+            latest_result.comment = comment
         latest_result.save()
 
         return Response(self.serializer_class(instance).data)

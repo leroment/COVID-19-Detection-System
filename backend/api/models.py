@@ -44,5 +44,6 @@ class DiagnosisResult(models.Model):
     approved = models.BooleanField()
     confidence = models.FloatField()
     has_covid = models.BooleanField()
+    comment = models.CharField(max_length=2048, null=True)
     creation_date = models.DateTimeField(auto_now_add=True)
     last_update = models.DateTimeField(auto_now=True)
