@@ -4,6 +4,7 @@ import struct
 import wave
 import time
 import os
+import sys
 
 Threshold = 20
 
@@ -63,7 +64,7 @@ class AudioFile:
                 coughcount = coughcount + 1
 
 def main(arg):
-    a = AudioFile("arg")
+    a = AudioFile(arg)
     a.listen()
 
 if __name__ == "__main__":

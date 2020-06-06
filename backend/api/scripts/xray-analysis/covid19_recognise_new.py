@@ -5,12 +5,17 @@ import tensorflow as tf
 CATEGORIES = ["Positive", "Negative"]
 
 def main(arg):
-    model = tf.keras.models.load_model("covid19.model")
+    model = tf.keras.models.load_model('api/scripts/xray-analysis/covid19.model')
 
     prediction = model.predict([prepare(arg)])
 
-    print("Positive")
-    print("{:.3%}".format(prediction[0][1]))
+    confidence_value = prediction[0][1]
+
+    confidence_value = "{:.3}".format(confidence_value*100)
+
+    #print("{:.3}".format(prediction[0][1]))
+
+    print (confidence_value)
 
 
 def prepare(filepath):

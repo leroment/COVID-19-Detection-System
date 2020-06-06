@@ -97,30 +97,37 @@ class UserDiagnosisViewSet(viewsets.ModelViewSet):
             raise ValidationError(validation_errors)
 
         # Run Analysis Scripts
+        covid_outcome=False
+        temp_outcome=False
+
         #run xray and sound detection
-        xray_out = subprocess.check_output(['python3', 'covid19_recognise_new.py', xray_file.temporary_file_path()])
-        soundfile_out = subprocess.check_output(['python3', 'coughdetect_new.py', audio_file.temporary_file_path()])
-        
+        xray_out = subprocess.check_output(['python3', 'api/scripts/xray-analysis/covid19_recognise_new.py', xray_file.temporary_file_path()])
+        soundfile_out = subprocess.check_output(['python3', 'api/scripts/cough-detection/coughdetect_new.py', audio_file.temporary_file_path()])       
 
         # # outcome converted to string (Positive/Negative) xray comes with probability percentage
         xray_string = xray_out.decode()
-        sound_string = soundfile_out.decode()
+        cough_string = soundfile_out.decode()
 
-        # #if != -1 it is positive
-        xray_outcome = xray_string.find("Positive")
-        sound_outcome = sound_string.find("Positive")
+        xray_string = xray_string.rstrip('\n')
 
-        print ('Xray:' + xray_string)
-        print ('sound:' + sound_string)
+        confidence_value = float(xray_string)
 
-        print ('Xray:' + str(xray_outcome))
-        print ('sound:' + str(sound_outcome))
+        # -1 is negative
+        cough_outcome = cough_string.find("Positive")
 
-        if (sound_outcome != -1):
-            sound_result = 'cough detected'
-        else:
-            sound_result = 'no cough detected'
+        #Temperature Analysis
+        if (data['temperature'] >= 38):
+            temp_outcome=True
 
+        #COVID determination
+        if (confidence_value >= 80):
+            covid_outcome=True
+
+        elif ((cough_outcome != -1 or temp_outcome) and confidence_value >= 70):
+            covid_outcome=True
+
+        elif (cough_outcome and temp_outcome and confidence_value >= 60):
+            covid_outcome=True
 
         # Get health officer with the least cases waiting to be reviewed
         health_officer = (
@@ -151,12 +158,20 @@ class UserDiagnosisViewSet(viewsets.ModelViewSet):
                 file=xray_data,
             )
 
+        diagnosisresult = DiagnosisResult.objects.create(
+            diagnosis=diagnosis,
+            approved=False,
+            confidence=float(xray_string),
+            has_covid=covid_outcome,
+            creation_date=True,
+            last_update=True
+        )
+
         response_data = {
             'id': diagnosis.id,
             'temperature_id': temperature.id,
             'audio_id': audio.id,
-            'xray_result': xray_string,
-            'audio_result': sound_result
+            'diagnosis_id': diagnosisresult.id
         }
 
         if xray_data:
