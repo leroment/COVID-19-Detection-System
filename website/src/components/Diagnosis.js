@@ -10,11 +10,15 @@ import {
   Grid,
   ButtonGroup,
   Button,
+  Chip,
+  Divider,
 } from "@material-ui/core";
 import { Link as RouterLink } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import { grey } from "@material-ui/core/colors";
 import Thermometer from "react-thermometer-component";
+import AudioPlayer from "react-h5-audio-player";
+import "react-h5-audio-player/lib/styles.css";
 
 const useStyles = makeStyles({
   root: {
@@ -32,11 +36,12 @@ const useStyles = makeStyles({
     marginLeft: 30,
     marginRight: 30,
     marginTop: 25,
-    height: "70vh",
-    width: "30vw",
+    height: "100%",
+    width: "50vw",
   },
   box: {
-    height: "60vh",
+    height: "40vh",
+    width: "20vw",
   },
 });
 
@@ -85,16 +90,18 @@ export default function Diagnosis(props) {
         );
       case 1:
         return (
-          <audio
-            controls
-            controlsList="nodownload"
-            src={`http://127.0.0.1:8000/api/audios/${audio}`}
-            style={{ marginTop: "25vh" }}
-          ></audio>
+          // <audio
+          //   controls
+          //   controlsList="nodownload"
+          //   src={`http://127.0.0.1:8000/api/audios/${audio}`}
+          //   style={{ marginTop: "10vh" }}
+          // ></audio>
+
+          <AudioPlayer src={`http://127.0.0.1:8000/api/audios/${audio}`} />
         );
       case 2:
         return (
-          <div style={{ marginTop: "10vh" }}>
+          <div style={{}}>
             <Thermometer
               theme="light"
               value={temp}
@@ -197,73 +204,110 @@ export default function Diagnosis(props) {
           <Typography color="textPrimary">Diagnosis {diagnosisId}</Typography>
         </Breadcrumbs>
       </div>
-      <div>
-        <Grid container direction="row" justify="center">
-          <Grid item>
-            <Card className={classes.card}>
-              <CardContent>
-                <Grid container direction="column" align="center">
-                  <Grid item className={classes.box}>
-                    {getContent(content)}
-                  </Grid>
-                  <Grid item style={{ marginTop: "2vh", marginBottom: "2vh" }}>
-                    <ButtonGroup
-                      color="primary"
-                      aria-label="outlined primary button group"
-                    >
-                      <Button
-                        variant={content === 0 ? "contained" : "outlined"}
-                        onClick={() => setContent(0)}
-                      >
-                        Xray Image
-                      </Button>
-                      <Button
-                        variant={content === 1 ? "contained" : "outlined"}
-                        onClick={() => setContent(1)}
-                      >
-                        Cough Sample
-                      </Button>
-                      <Button
-                        variant={content === 2 ? "contained" : "outlined"}
-                        onClick={() => setContent(2)}
-                      >
-                        Temperature Reading
-                      </Button>
-                    </ButtonGroup>
-                  </Grid>
-                </Grid>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item>
-            <Card className={classes.card}>
-              <CardContent>
+      <div align="center">
+        <Card className={classes.card}>
+          <CardContent>
+            <Grid
+              container
+              direction="column"
+              spacing={3}
+              justify="space-around"
+            >
+              <Grid item>
                 <Grid
                   container
-                  direction="column"
-                  justify="center"
-                  align="center"
+                  direction="row"
+                  justify="space-evenly"
+                  alignItems="center"
                 >
                   <Grid item>
-                    <h1>Diagnosis ID: {diagnosis.id}</h1>
-                    <p>Status: {diagnosis.status}</p>
-                    <p>
-                      Last Status Update: {formatDate(diagnosis.last_update)}
-                    </p>
-                    <p>Date Submitted: {formatDate(diagnosis.creation_date)}</p>
-                    <p>
-                      Health Officer Assigned: {info.first_name}{" "}
-                      {info.last_name}
-                    </p>
+                    <Typography variant="h2">
+                      Diagnosis ID: {diagnosis.id}
+                    </Typography>
                   </Grid>
                   <Grid item>
-                    
+                    <Chip
+                      color="secondary"
+                      label={`Status: ${diagnosis.status}`}
+                    />
                   </Grid>
                 </Grid>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
+              </Grid>
+              <Divider />
+              <Grid item>
+                <Grid
+                  container
+                  direction="row"
+                  spacing={1}
+                  justify="space-around"
+                >
+                  <Grid item>
+                    <Grid container direction="column" justify="flex-start">
+                      <Grid item>
+                        <Chip
+                          label={`Last Status Update: ${formatDate(
+                            diagnosis.last_update
+                          )}`}
+                        />
+                      </Grid>
+                      <Grid item>
+                        <Chip
+                          label={`Date Submitted: ${formatDate(
+                            diagnosis.creation_date
+                          )}`}
+                        />
+                      </Grid>
+                      <Grid item>
+                        <Chip
+                          label={`Health Officer Assigned: ${info.first_name} ${info.last_name}`}
+                        />
+                      </Grid>
+                    </Grid>
+                  </Grid>
+                  <Divider orientation="vertical" flexItem />
+                  <Grid item>
+                    <Grid container direction="column">
+                      <div align="center">
+                        <Grid item className={classes.box}>
+                          {getContent(content)}
+                        </Grid>
+                      </div>
+
+                      <Grid
+                        item
+                        style={{ marginTop: "2vh", marginBottom: "2vh" }}
+                      >
+                        <ButtonGroup
+                          color="primary"
+                          aria-label="outlined primary button group"
+                        >
+                          <Button
+                            variant={content === 0 ? "contained" : "outlined"}
+                            onClick={() => setContent(0)}
+                          >
+                            Xray Image
+                          </Button>
+                          <Button
+                            variant={content === 1 ? "contained" : "outlined"}
+                            onClick={() => setContent(1)}
+                          >
+                            Cough Sample
+                          </Button>
+                          <Button
+                            variant={content === 2 ? "contained" : "outlined"}
+                            onClick={() => setContent(2)}
+                          >
+                            Temperature Reading
+                          </Button>
+                        </ButtonGroup>
+                      </Grid>
+                    </Grid>
+                  </Grid>
+                </Grid>
+              </Grid>
+            </Grid>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
