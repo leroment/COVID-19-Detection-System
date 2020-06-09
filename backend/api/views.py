@@ -97,12 +97,12 @@ class UserDiagnosisViewSet(viewsets.ModelViewSet):
             raise ValidationError(validation_errors)
 
         # Run Analysis Scripts
-        covid_outcome=False
-        temp_outcome=False
+        covid_outcome = False
+        temp_outcome = False
 
-        #run xray and sound detection
-        xray_out = subprocess.check_output(['python3', 'api/scripts/xray-analysis/covid19_recognise_new.py', xray_file.temporary_file_path()])
-        soundfile_out = subprocess.check_output(['python3', 'api/scripts/cough-detection/coughdetect_new.py', audio_file.temporary_file_path()])       
+        # run xray and sound detection
+        xray_out = subprocess.check_output(['python', 'api/scripts/xray-analysis/covid19_recognise_new.py', xray_file.temporary_file_path()])
+        soundfile_out = subprocess.check_output(['python', 'api/scripts/cough-detection/coughdetect_new.py', audio_file.temporary_file_path()])
 
         # # outcome converted to string (Positive/Negative) xray comes with probability percentage
         xray_string = xray_out.decode()
@@ -115,19 +115,19 @@ class UserDiagnosisViewSet(viewsets.ModelViewSet):
         # -1 is negative
         cough_outcome = cough_string.find("Positive")
 
-        #Temperature Analysis
+        # Temperature Analysis
         if (data['temperature'] >= 38):
-            temp_outcome=True
+            temp_outcome = True
 
         #COVID determination
         if (confidence_value >= 80):
-            covid_outcome=True
+            covid_outcome = True
 
         elif ((cough_outcome != -1 or temp_outcome) and confidence_value >= 70):
-            covid_outcome=True
+            covid_outcome = True
 
         elif (cough_outcome and temp_outcome and confidence_value >= 60):
-            covid_outcome=True
+            covid_outcome = True
 
         # Get health officer with the least cases waiting to be reviewed
         health_officer = (
@@ -141,7 +141,7 @@ class UserDiagnosisViewSet(viewsets.ModelViewSet):
         # Create items in database
         diagnosis = Diagnosis.objects.create(
             user_id=user_id,
-            status=DiagnosisStatus.WAITING,
+            status=DiagnosisStatus.AWAITING_REVIEW,
             health_officer=health_officer,
         )
         temperature = TemperatureReading.objects.create(

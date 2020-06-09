@@ -22,7 +22,7 @@ import NewDiagnosis from "./NewDiagnosis";
 
 const useStyles = makeStyles({
   table: {
-    minWidth: "100vh",
+    minWidth: "80vh",
   },
   root: {
     backgroundColor: grey[200],
@@ -65,12 +65,16 @@ export default function Dashboard() {
   const [open, setOpen] = useState(false);
   const [diagnoses, setDiagnoses] = useState([]);
 
-  useEffect(() => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  const isStaff = user.is_staff;
+
+  const fetchDiagnoses = () => {
+    const url = isStaff
+      ? `http://127.0.0.1:8000/api/healthofficers/${user.id}/diagnoses/?status=AWAITING_REVIEW`
+      : `http://127.0.0.1:8000/api/users/${user.id}/diagnoses/`;
+
     axios
-      .get(
-        `http://127.0.0.1:8000/api/users/${localStorage.getItem(
-          "userId"
-        )}/diagnoses/`,
+      .get(url,
         {
           headers: {
             Authorization: `Token ${localStorage.getItem("token")}`,
@@ -79,12 +83,13 @@ export default function Dashboard() {
       )
       .then((response) => {
         setDiagnoses(response.data);
-        console.log(response.data);
       })
       .catch((err) => {
         console.log(err);
       });
-  }, []);
+  };
+
+  useEffect(fetchDiagnoses, []);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -92,24 +97,7 @@ export default function Dashboard() {
 
   const callback = (value) => {
     setOpen(false);
-
-    axios
-      .get(
-        `http://127.0.0.1:8000/api/users/${localStorage.getItem(
-          "userId"
-        )}/diagnoses/`,
-        {
-          headers: {
-            Authorization: `Token ${localStorage.getItem("token")}`,
-          },
-        }
-      )
-      .then((response) => {
-        setDiagnoses(response.data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    fetchDiagnoses();
   };
 
   function formatDate(date) {
@@ -181,7 +169,7 @@ export default function Dashboard() {
                   New Diagnosis +
                 </Button>
               }
-              title="Current Diagnoses"
+              title={isStaff ? "Diagnoses Awaiting Review" : "Current Diagnoses"}
             />
             <NewDiagnosis open={open} parentCallback={callback} />
             <Divider />
@@ -190,7 +178,9 @@ export default function Dashboard() {
                 <TableHead>
                   <TableRow>
                     <TableCell>Diagnosis ID</TableCell>
-                    <TableCell>Health Officer Assigned</TableCell>
+                    {!isStaff && (
+                      <TableCell>Health Officer Assigned</TableCell>
+                    )}
                     <TableCell>Status</TableCell>
                     <TableCell>Date Submitted</TableCell>
                   </TableRow>
@@ -206,6 +196,11 @@ export default function Dashboard() {
                       <TableCell align="left">{row.dateSubmitted}</TableCell>
                     </TableRow>
                   ))} */}
+                  {diagnoses.length == 0 && (
+                    <TableRow>
+                      <TableCell style={{textAlign: 'center'}} colSpan={isStaff ? 3 : 4}>{isStaff ? "No diagnoses to review" : "No submitted diagnoses"}</TableCell>
+                    </TableRow>
+                  )}
                   {diagnoses.map((diagnosis, index) => (
                     <TableRow key={index}>
                       <TableCell component="th" scope="row">
@@ -216,10 +211,12 @@ export default function Dashboard() {
                           {diagnosis.id}
                         </Link>
                       </TableCell>
-                      <TableCell>
-                        {diagnosis.health_officer.first_name}{" "}
-                        {diagnosis.health_officer.last_name}
-                      </TableCell>
+                      {!isStaff && (
+                        <TableCell>
+                          {diagnosis.health_officer.first_name}{" "}
+                          {diagnosis.health_officer.last_name}
+                        </TableCell>
+                      )}
                       <TableCell>{diagnosis.status}</TableCell>
                       <TableCell>
                         {formatDate(diagnosis.creation_date)}

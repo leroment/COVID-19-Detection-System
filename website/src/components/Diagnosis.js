@@ -12,8 +12,9 @@ import {
   Button,
   Chip,
   Divider,
+  Box,
 } from "@material-ui/core";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, Redirect } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import { grey } from "@material-ui/core/colors";
 import Thermometer from "react-thermometer-component";
@@ -45,6 +46,75 @@ const useStyles = makeStyles({
   },
 });
 
+const ResultMessage = (props) => {
+  const classes = useStyles();
+  const {
+    staff,
+    result,
+    actionCallback,
+  } = props;
+
+  if(!result) {
+    return null;
+  }
+
+  if(result.approved) {
+    return (
+      <Grid item>
+        <h3>
+          The result of this diagnosis is that {staff ? "this patient" : "you"} {
+            result.has_covid
+              ? " have"
+              : " does not have"
+          } COVID-19.
+        </h3>
+      </Grid>
+    );
+  }
+
+  if(staff) {
+    return (
+      <>
+        <Grid item>
+          <h3>
+            Automated analysis believes this patient {
+              result.has_covid
+                ? " has"
+                : " does not have"
+            } COVID-19, with {result.confidence}% confidence.
+          </h3>
+        </Grid>
+        <Grid container direction="row" justify="center" spacing={1}>
+          <Grid item>
+            <Button
+              color="primary"
+              size="small"
+              variant="outlined"
+              onClick={() => actionCallback(true)}
+              className={classes.actionButton}
+            >
+              Approve
+            </Button>
+          </Grid>
+          <Grid item>
+            <Button
+              color="secondary"
+              size="small"
+              variant="outlined"
+              onClick={() => actionCallback(false)}
+              className={classes.actionButton}
+            >
+              Reject
+            </Button>
+          </Grid>
+        </Grid>
+      </>
+    );
+  }
+
+  return null;
+};
+
 export default function Diagnosis(props) {
   const classes = useStyles();
   const { diagnosisId } = props.match.params;
@@ -55,7 +125,11 @@ export default function Diagnosis(props) {
   const [content, setContent] = useState(0);
   const [info, setInfo] = useState({});
 
+  const [returnToDashboard, setReturnToDashboard] = useState(false);
+
   const isInitialMount = useRef(true);
+  const user = JSON.parse(localStorage.getItem("user"));
+  const isStaff = user.is_staff;
 
   function formatDate(date) {
     let d = new Date(date);
@@ -119,11 +193,12 @@ export default function Diagnosis(props) {
   }
 
   const fetchDiagnosis = () => {
+    const url = isStaff
+      ? `http://127.0.0.1:8000/api/healthofficers/${user.id}/diagnoses/${diagnosisId}/`
+      : `http://127.0.0.1:8000/api/users/${user.id}/diagnoses/${diagnosisId}/`;
+
     axios
-      .get(
-        `http://127.0.0.1:8000/api/users/${localStorage.getItem(
-          "userId"
-        )}/diagnoses/${diagnosisId}/`,
+      .get(url,
         {
           headers: {
             Authorization: `Token ${localStorage.getItem("token")}`,
@@ -193,6 +268,27 @@ export default function Diagnosis(props) {
     }
   });
 
+  const approve = (isApproved) => {
+    axios.put(
+      `http://127.0.0.1:8000/api/healthofficers/${user.id}/diagnoses/${diagnosisId}/`,
+      {
+        "approved": isApproved,
+        // "comment": prompt("Comment"),
+      },
+      {
+        headers: {
+          Authorization: `Token ${localStorage.getItem("token")}`,
+        },
+      }
+    ).then(() => {
+      setReturnToDashboard(true);
+    });
+  };
+
+  if(returnToDashboard) {
+    return <Redirect to="/dashboard" />;
+  }
+
   return (
     <div className={classes.root}>
       <Menubar />
@@ -241,8 +337,9 @@ export default function Diagnosis(props) {
                   spacing={1}
                   justify="space-around"
                 >
-                  <Grid item>
-                    <Grid container direction="column" justify="flex-start">
+                  <Grid item style={{flexBasis: 1}}>
+                    <Grid container direction="column" justify="flex-start" spacing={1}>
+                      <ResultMessage staff={isStaff} result={diagnosis.result} actionCallback={approve}/>
                       <Grid item>
                         <Chip
                           label={`Last Status Update: ${formatDate(
@@ -265,7 +362,7 @@ export default function Diagnosis(props) {
                     </Grid>
                   </Grid>
                   <Divider orientation="vertical" flexItem />
-                  <Grid item>
+                  <Grid item style={{flexBasis: 1}}>
                     <Grid container direction="column">
                       <div align="center">
                         <Grid item className={classes.box}>

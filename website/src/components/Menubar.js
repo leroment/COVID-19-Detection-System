@@ -31,6 +31,9 @@ export default function Menubar() {
 
   const isMenuOpen = Boolean(anchorEl);
 
+  const user = JSON.parse(localStorage.getItem("user"));
+  const isStaff = user.is_staff;
+
   const menuId = "primary-search-account-menu";
 
   const handleProfileMenuOpen = (event) => {
@@ -73,12 +76,12 @@ export default function Menubar() {
       <AppBar position="static">
         <Toolbar>
           <Typography className={classes.title} variant="h6" noWrap>
-            COVID-19 Detection
+            COVID-19 Detection {isStaff && "(Health Officer)"}
           </Typography>
           <div className={classes.grow} />
           <div className={classes.sectionDesktop}>
             <IconButton aria-label="show 17 new notifications" color="inherit">
-              <Badge badgeContent={17} color="secondary">
+              <Badge badgeContent={0} color="secondary">
                 <NotificationsIcon />
               </Badge>
             </IconButton>
