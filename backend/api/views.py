@@ -10,9 +10,12 @@ from rest_framework.exceptions import ValidationError
 from django.db.models import Count, Q
 import json
 import magic
+import subprocess
+import sys
+import os
 
 from .serializers import UserSerializer, UserValidationSerializer, DiagnosisSerializer, XraySerializer, AudioSerializer, TemperatureSerializer
-from .models import Diagnosis, TemperatureReading, AudioRecording, XrayImage, DiagnosisStatus
+from .models import Diagnosis, TemperatureReading, AudioRecording, XrayImage, DiagnosisStatus, DiagnosisResult
 
 import logging
 
@@ -25,6 +28,14 @@ class UserOnly(BasePermission):
     def has_permission(self, request, view):
         user_id = int(request.resolver_match.kwargs['user_pk'])
         return request.user.id == user_id
+
+
+class HealthOfficerOnly(BasePermission):
+    message = 'Not a health officer'
+
+    def has_permission(self, request, view):
+        healthofficer_id = int(request.resolver_match.kwargs['healthofficer_pk'])
+        return request.user.is_staff and request.user.id == healthofficer_id
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -85,6 +96,39 @@ class UserDiagnosisViewSet(viewsets.ModelViewSet):
         if validation_errors:
             raise ValidationError(validation_errors)
 
+        # Run Analysis Scripts
+        covid_outcome=False
+        temp_outcome=False
+
+        #run xray and sound detection
+        xray_out = subprocess.check_output(['python3', 'api/scripts/xray-analysis/covid19_recognise_new.py', xray_file.temporary_file_path()])
+        soundfile_out = subprocess.check_output(['python3', 'api/scripts/cough-detection/coughdetect_new.py', audio_file.temporary_file_path()])       
+
+        # # outcome converted to string (Positive/Negative) xray comes with probability percentage
+        xray_string = xray_out.decode()
+        cough_string = soundfile_out.decode()
+
+        xray_string = xray_string.rstrip('\n')
+
+        confidence_value = float(xray_string)
+
+        # -1 is negative
+        cough_outcome = cough_string.find("Positive")
+
+        #Temperature Analysis
+        if (data['temperature'] >= 38):
+            temp_outcome=True
+
+        #COVID determination
+        if (confidence_value >= 80):
+            covid_outcome=True
+
+        elif ((cough_outcome != -1 or temp_outcome) and confidence_value >= 70):
+            covid_outcome=True
+
+        elif (cough_outcome and temp_outcome and confidence_value >= 60):
+            covid_outcome=True
+
         # Get health officer with the least cases waiting to be reviewed
         health_officer = (
             User.objects
@@ -114,16 +158,85 @@ class UserDiagnosisViewSet(viewsets.ModelViewSet):
                 file=xray_data,
             )
 
+        diagnosisresult = DiagnosisResult.objects.create(
+            diagnosis=diagnosis,
+            approved=False,
+            confidence=float(xray_string),
+            has_covid=covid_outcome,
+            creation_date=True,
+            last_update=True
+        )
+
         response_data = {
             'id': diagnosis.id,
             'temperature_id': temperature.id,
             'audio_id': audio.id,
+            'diagnosis_id': diagnosisresult.id
         }
 
         if xray_data:
             response_data['xray_id'] = xray.id
 
         return Response(response_data, status=status.HTTP_201_CREATED)
+
+
+class HealthOfficerViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = User.objects.filter(is_staff=True)
+    serializer_class = UserSerializer
+
+
+class HealthOfficerDiagnosisViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = (IsAuthenticated, HealthOfficerOnly)
+    serializer_class = DiagnosisSerializer
+
+    def get_queryset(self):
+        status_filter = self.request.query_params.get('status', None)
+
+        user_id = int(self.kwargs['healthofficer_pk'])
+        qs = Diagnosis.objects.filter(health_officer=user_id)
+        try:
+            if status_filter:
+                qs = qs.filter(status=DiagnosisStatus[status_filter])
+        except KeyError:
+            raise ValidationError({'status': status_filter + ' is not a valid status'})
+        return qs
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.status != DiagnosisStatus.AWAITING_REVIEW:
+            raise ValidationError('Diagnosis not awaiting review')
+
+        validation_errors = {}
+
+        approved = request.data.get('approved')
+        comment = request.data.get('comment')
+
+        if approved is None:
+            validation_errors['approved'] = 'Required'
+        if type(approved) != bool:
+            validation_errors['approved'] = 'Must be a boolean'
+
+        if comment is not None:
+            if type(comment) != str:
+                validation_errors['comment'] = 'Must be a string'
+
+        if validation_errors:
+            raise ValidationError(validation_errors)
+
+        if approved:
+            instance.status = DiagnosisStatus.REVIEWED
+        else:
+            instance.status = DiagnosisStatus.NEEDS_DATA
+        instance.save()
+
+        latest_result = DiagnosisResult.objects.filter(diagnosis=instance).order_by('last_update').last()
+        latest_result.approved = True
+        if comment:
+            latest_result.comment = comment
+        latest_result.save()
+
+        return Response(self.serializer_class(instance).data)
+
 
 
 class XrayViewSet(viewsets.ReadOnlyModelViewSet):

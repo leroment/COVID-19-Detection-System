@@ -87,7 +87,7 @@ Create a new Diagnosis for a user.
 
 ##### Format
 ```json
-POST /api/user/<id>/diagnoses/
+POST /api/users/<id>/diagnoses/
 Authorization: Token <authtoken>
 Content-Type: multipart/form-data
 
@@ -174,7 +174,7 @@ Authorization: Token <authtoken>
     {
         "id": <number>,
         "user": <user id>,
-        "status": "<WAITING | PROCESSING | AWAITING_REVIEW | REVIEWED>",
+        "status": "<NEEDS_DATA | WAITING | PROCESSING | AWAITING_REVIEW | REVIEWED>",
         "health_officer": {
             "id": <health officer user id>,
             "first_name": "<name>",
@@ -192,6 +192,15 @@ Authorization: Token <authtoken>
         "xrayimages": [{
             "id": <number>,
         }],
+        "result": {
+            "diagnosis": <id>,
+            "approved": <bool>,
+            "confidence": <float 0-1>,
+            "has_covid": <bool>,
+            "comment": "<string>" or null,
+            "creation_date": "2020-06-01T05:50:11.542754Z",
+            "last_update":"2020-06-01T05:50:11.542754Z"
+        }
     }
 ]
 ```
@@ -209,7 +218,7 @@ Get list of user's diagnosis.
 
 ##### Format
 ```json
-GET /api/users/<id>/diagnosis/<id>/
+GET /api/users/<id>/diagnoses/<id>/
 Authorization: Token <authtoken>
 ```
 
@@ -220,7 +229,7 @@ Authorization: Token <authtoken>
 {
     "id": <number>,
     "user": <user id>,
-    "status": "<WAITING | PROCESSING | AWAITING_REVIEW | REVIEWED>",
+    "status": "<NEEDS_DATA | WAITING | PROCESSING | AWAITING_REVIEW | REVIEWED>",
     "health_officer": {
         "id": <health officer user id>,
         "first_name": "<name>",
@@ -238,6 +247,15 @@ Authorization: Token <authtoken>
     "xrayimages": [{
         "id": <number>,
     }],
+    "result": {
+        "diagnosis": <id>,
+        "approved": <bool>,
+        "confidence": <float 0-1>,
+        "has_covid": <bool>,
+        "comment": "<string>" or null,
+        "creation_date": "2020-06-01T05:50:11.542754Z",
+        "last_update":"2020-06-01T05:50:11.542754Z"
+    }
 }
 ```
 
@@ -281,4 +299,138 @@ PNG image
 ```
 200 OK
 Content-Type: image/png
+```
+
+
+### Get Health Officer Diagnoses list
+Get list of diagnoses awaiting approval by health officer.
+
+##### Format
+```json
+GET /api/healthofficers/<id>/diagnoses/?status=AWAITING_REVIEW
+Authorization: Token <authtoken>
+```
+
+Other statuses include:
+```
+NEEDS_DATA
+WAITING
+PROCESSING
+AWAITING_REVIEW
+REVIEWED
+```
+
+#### Responses
+##### Successful response:
+```json
+200 OK
+[
+    {
+        "id": <number>,
+        "user": <user id>,
+        "status": "<NEEDS_DATA | WAITING | PROCESSING | AWAITING_REVIEW | REVIEWED>",
+        "health_officer": {
+            "id": <health officer user id>,
+            "first_name": "<name>",
+            "last_name": "<name>",
+        }
+        "last_update": "2020-06-01T01:37:32.471454Z",
+        "creation_date": "2020-06-01T01:37:32.471454Z",
+        "temperaturereadings": [{
+            "id": <number>,
+            "reading": <number>
+        }],
+        "audiorecordings": [{
+            "id": <number>,
+        }],
+        "xrayimages": [{
+            "id": <number>,
+        }],
+        "result": {
+            "diagnosis": <id>,
+            "approved": <bool>,
+            "confidence": <float 0-1>,
+            "has_covid": <bool>,
+            "comment": "<string>" or null,
+            "creation_date": "2020-06-01T05:50:11.542754Z",
+            "last_update":"2020-06-01T05:50:11.542754Z"
+        }
+    }
+]
+```
+
+##### User making request is not a health officer
+```json
+403 Bad Request
+{
+    "detail":"Not a health officer"
+}
+```
+
+
+### Health Officer Approve or Decline diagnosis result
+Approve or decline a diagnosis result as a Health Officer
+
+##### Format
+```json
+PUT /api/healthofficers/<id>/diagnoses/<id>/
+Authorization: Token <authtoken>
+
+{
+    "approved": <bool>,
+    "comment": "<string>" or null,
+}
+```
+
+#### Responses
+##### Successful response:
+```json
+200 OK
+[
+    {
+        "id": <number>,
+        "user": <user id>,
+        "status": "<NEEDS_DATA | WAITING | PROCESSING | AWAITING_REVIEW | REVIEWED>", // would be "REVIEWED"
+        "health_officer": {
+            "id": <health officer user id>,
+            "first_name": "<name>",
+            "last_name": "<name>",
+        }
+        "last_update": "2020-06-01T01:37:32.471454Z",
+        "creation_date": "2020-06-01T01:37:32.471454Z",
+        "temperaturereadings": [{
+            "id": <number>,
+            "reading": <number>
+        }],
+        "audiorecordings": [{
+            "id": <number>,
+        }],
+        "xrayimages": [{
+            "id": <number>,
+        }],
+        "result": {
+            "diagnosis": <id>,
+            "approved": <bool>, // would be true
+            "confidence": <float 0-1>,
+            "has_covid": <bool>,
+            "comment": "<string>" or null,
+            "creation_date": "2020-06-01T05:50:11.542754Z",
+            "last_update":"2020-06-01T05:50:11.542754Z"
+        }
+    }
+]
+```
+
+##### User making request is not a health officer
+```json
+403 Bad Request
+{
+    "detail":"Not a health officer"
+}
+```
+
+##### Diagnosis is not awaiting review
+```json
+403 Bad Request
+["Diagnosis not awaiting review"]
 ```
