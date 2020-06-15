@@ -12,6 +12,7 @@ import {
   Button,
   Chip,
   Divider,
+  TextField,
 } from "@material-ui/core";
 import { Link as RouterLink, Redirect } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
@@ -58,11 +59,11 @@ const ResultMessage = (props) => {
       return (
         <>
           <Grid item>
-            <h3>
+            <h4>
               Automated analysis believes this patient{" "}
               {result.has_covid ? " has" : " does not have"} COVID-19, with{" "}
               {result.confidence}% confidence.
-            </h3>
+            </h4>
           </Grid>
           <Grid container direction="row" justify="center" spacing={1}>
             <Grid item>
@@ -94,7 +95,7 @@ const ResultMessage = (props) => {
       return (
         <>
           <Grid item>
-            <h3
+            <h4
               style={{
                 border: "3px",
                 borderStyle: "solid",
@@ -103,14 +104,14 @@ const ResultMessage = (props) => {
               }}
             >
               You have rejected the diagnosis.
-            </h3>
+            </h4>
           </Grid>
           <Grid item>
-            <h3>
+            <h4>
               Automated analysis believes this patient{" "}
               {result.has_covid ? " has" : " does not have"} COVID-19, with{" "}
               {result.confidence}% confidence.
-            </h3>
+            </h4>
           </Grid>
         </>
       );
@@ -119,7 +120,7 @@ const ResultMessage = (props) => {
         return (
           <>
             <Grid item>
-              <h3
+              <h4
                 style={{
                   border: "3px",
                   borderStyle: "solid",
@@ -128,14 +129,14 @@ const ResultMessage = (props) => {
                 }}
               >
                 You have approved the diagnosis.
-              </h3>
+              </h4>
             </Grid>
             <Grid item>
-              <h3>
+              <h4>
                 Automated analysis believes this patient{" "}
                 {result.has_covid ? " has" : " does not have"} COVID-19, with{" "}
                 {result.confidence}% confidence.
-              </h3>
+              </h4>
             </Grid>
           </>
         );
@@ -146,7 +147,7 @@ const ResultMessage = (props) => {
   if (status === "NEEDS_DATA") {
     return (
       <Grid item>
-        <h3
+        <h4
           style={{
             border: "3px",
             borderStyle: "solid",
@@ -156,13 +157,13 @@ const ResultMessage = (props) => {
         >
           Unfortunately, this diagnosis has NOT BEEN APPROVED by the health
           officer. Please create a new diagnosis with valid data.
-        </h3>
+        </h4>
       </Grid>
     );
   } else if (status === "AWAITING_REVIEW") {
     return (
       <Grid item>
-        <h3
+        <h4
           style={{
             border: "3px",
             borderStyle: "solid",
@@ -172,7 +173,7 @@ const ResultMessage = (props) => {
         >
           Your diagnosis is AWAITING REVIEW. Please wait for approval from the
           health officer assigned.
-        </h3>
+        </h4>
       </Grid>
     );
   } else {
@@ -180,7 +181,7 @@ const ResultMessage = (props) => {
       return (
         <>
           <Grid item>
-            <h3
+            <h4
               style={{
                 border: "3px",
                 borderStyle: "solid",
@@ -198,7 +199,7 @@ const ResultMessage = (props) => {
                 ? " DO NOT have "
                 : " DOES NOT have "}
               COVID-19.
-            </h3>
+            </h4>
           </Grid>
         </>
       );
@@ -217,6 +218,7 @@ export default function Diagnosis(props) {
   const [temp, setTemp] = useState(0);
   const [content, setContent] = useState(0);
   const [info, setInfo] = useState({});
+  const [comment, setComment] = useState("");
 
   const [returnToDashboard, setReturnToDashboard] = useState(false);
 
@@ -347,6 +349,10 @@ export default function Diagnosis(props) {
     setTemp(diagnosis.temperaturereadings[0].reading);
   };
 
+  const fetchComment = () => {
+    setComment(diagnosis.result.comment);
+  };
+
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false;
@@ -356,6 +362,7 @@ export default function Diagnosis(props) {
       fetchXray();
       fetchAudio();
       fetchTemp();
+      fetchComment();
     }
   });
 
@@ -365,7 +372,7 @@ export default function Diagnosis(props) {
         `http://127.0.0.1:8000/api/healthofficers/${user.id}/diagnoses/${diagnosisId}/`,
         {
           approved: isApproved,
-          // "comment": prompt("Comment"),
+          comment: comment,
         },
         {
           headers: {
@@ -447,6 +454,28 @@ export default function Diagnosis(props) {
                         status={diagnosis.status}
                         actionCallback={approve}
                       />
+                      <Grid item style={{ marginTop: "none" }}>
+                        <p
+                          style={{
+                            textDecoration: "underline",
+                            fontStyle: "italic",
+                          }}
+                        >
+                          Health Officer Comments:
+                        </p>
+                        <TextField
+                          style={{ width: "100%" }}
+                          id="outlined-multiline-static"
+                          multiline
+                          rows={4}
+                          variant="outlined"
+                          disabled={!isStaff}
+                          value={comment}
+                          onChange={(event) => {
+                            setComment(event.target.value);
+                          }}
+                        />
+                      </Grid>
                       <Grid item>
                         <Chip
                           label={`Last Status Update: ${formatDate(
