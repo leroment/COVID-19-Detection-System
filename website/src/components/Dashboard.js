@@ -54,26 +54,35 @@ const useStyles = makeStyles({
   },
 });
 
-// function createData(diagnosisId, healthOfficer, status, dateSubmitted) {
-//   return { diagnosisId, healthOfficer, status, dateSubmitted };
-// }
-
-// const rows = [
-//   // createData("342341233124", "Steve Jobs", "Pending", "12/05/2020"),
-//   // createData("342341233124", "Bill Gates", "Pending", "03/02/2020"),
-//   // createData("342341233126", "Steve Balmer", "Result Ready", "14/03/2020"),
-//   // createData("123323124423", "Steve Wozniak", "Submitted", "12/05/2020"),
-// ];
-
 export default function Dashboard() {
   const classes = useStyles();
   const [open, setOpen] = useState(false);
   const [diagnoses, setDiagnoses] = useState([]);
   const [content, setContent] = useState(0);
-  const [count, setCount] = useState(0);
+  const [activeUsers, setActiveUsers] = useState(0);
+  const [totalDiagnoses, setTotalDiagnoses] = useState(0);
+  const [totalReviewedDiagnoses, setTotalReviewedDiagnoses] = useState(0);
+  const [totalInfected, setTotalInfected] = useState(0);
+  const [secondsSincePositive, setSecondsSincePositive] = useState(0);
 
   const user = JSON.parse(localStorage.getItem("user"));
   const isStaff = user.is_staff;
+
+  const fetchStats = () => {
+    axios
+      .get(`http://127.0.0.1:8000/api/stats/`)
+      .then((response) => {
+        console.log(response.data);
+        setActiveUsers(response.data.active_users);
+        setTotalDiagnoses(response.data.total_diagnoses);
+        setTotalReviewedDiagnoses(response.data.total_reviewed_diagnoses);
+        setTotalInfected(response.data.total_infected);
+        setSecondsSincePositive(response.data.seconds_since_positive);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
   const fetchDiagnoses = (what = 0) => {
     const url = isStaff
@@ -98,7 +107,10 @@ export default function Dashboard() {
       });
   };
 
-  useEffect(fetchDiagnoses, []);
+  useEffect(() => {
+    fetchDiagnoses();
+    fetchStats();
+  }, []);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -152,20 +164,50 @@ export default function Dashboard() {
               <Card className={classes.card}>
                 <CardContent>
                   <Typography component="h5" variant="h5" align="center">
-                    Number of People Diagnosed
-                    <p>{count}</p>
+                    Active Users
+                    <p>{activeUsers}</p>
                   </Typography>
                 </CardContent>
               </Card>
             </Grid>
             <Grid item>
               <Card className={classes.card}>
-                <CardContent></CardContent>
+                <CardContent>
+                  <Typography component="h5" variant="h5" align="center">
+                    Total Diagnoses
+                    <p>{totalDiagnoses}</p>
+                  </Typography>
+                </CardContent>
               </Card>
             </Grid>
             <Grid item>
               <Card className={classes.card}>
-                <CardContent></CardContent>
+                <CardContent>
+                  <Typography component="h5" variant="h5" align="center">
+                    Total Reviewed Diagonses
+                    <p>{totalReviewedDiagnoses}</p>
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item>
+              <Card className={classes.card}>
+                <CardContent>
+                  <Typography component="h5" variant="h5" align="center">
+                    Total Infected
+                    <p>{totalInfected}</p>
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item>
+              <Card className={classes.card}>
+                <CardContent>
+                  <Typography component="h5" variant="h5" align="center">
+                    Seconds Since Positive
+                    <p>{secondsSincePositive}</p>
+                  </Typography>
+                </CardContent>
               </Card>
             </Grid>
           </Grid>
