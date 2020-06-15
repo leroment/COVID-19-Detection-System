@@ -255,6 +255,9 @@ export default function Diagnosis(props) {
             alt="xray"
             height="100%"
             width="100%"
+            style={{
+              objectFit: 'contain'
+            }}
           />
         );
       case 1:
@@ -354,17 +357,17 @@ export default function Diagnosis(props) {
   };
 
   useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      fetchDiagnosis();
-    } else {
-      // Your useEffect code here to be run on update
+    fetchDiagnosis();
+  }, []);
+
+  useEffect(() => {
+    if(diagnosis && Object.keys(diagnosis).length !== 0) {
       fetchXray();
       fetchAudio();
       fetchTemp();
       fetchComment();
     }
-  });
+  }, [diagnosis]);
 
   const approve = (isApproved) => {
     axios
