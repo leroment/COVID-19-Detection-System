@@ -454,7 +454,7 @@ GET /api/stats/
     "total_diagnoses": <integer>,
     "total_reviewed_diagnoses": <integer>,
     "total_infected": <integer>,
-    "seconds_since_positive": <integer>
+    "seconds_since_positive": <integer> or null if no positive diagnoses
 }
 ```
 
@@ -464,5 +464,5 @@ active_users: count of users with a submitted diagnosis
 total_diagnoses: count of diagnoses with any status
 total_reviewed_diagnoses: count of diagnoses with REVIEWED status
 total_infected: count of users with a positive COVID-19 diagnosis
-seconds_since_positive: seconds since a positive diagnosis was submitted
+seconds_since_positive: seconds since a positive diagnosis was submitted, or empty if no positive diagnoses ever
 ```
