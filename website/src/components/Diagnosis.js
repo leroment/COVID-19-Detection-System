@@ -53,6 +53,96 @@ const ResultMessage = (props) => {
     return null;
   }
 
+  if (staff) {
+    if (status === "AWAITING_REVIEW") {
+      return (
+        <>
+          <Grid item>
+            <h3>
+              Automated analysis believes this patient{" "}
+              {result.has_covid ? " has" : " does not have"} COVID-19, with{" "}
+              {result.confidence}% confidence.
+            </h3>
+          </Grid>
+          <Grid container direction="row" justify="center" spacing={1}>
+            <Grid item>
+              <Button
+                color="primary"
+                size="small"
+                variant="outlined"
+                onClick={() => actionCallback(true)}
+                className={classes.actionButton}
+              >
+                Approve
+              </Button>
+            </Grid>
+            <Grid item>
+              <Button
+                color="secondary"
+                size="small"
+                variant="outlined"
+                onClick={() => actionCallback(false)}
+                className={classes.actionButton}
+              >
+                Reject
+              </Button>
+            </Grid>
+          </Grid>
+        </>
+      );
+    } else if (status === "NEEDS_DATA") {
+      return (
+        <>
+          <Grid item>
+            <h3
+              style={{
+                border: "3px",
+                borderStyle: "solid",
+                borderColor: "#FF0000",
+                padding: "1em",
+              }}
+            >
+              You have rejected the diagnosis.
+            </h3>
+          </Grid>
+          <Grid item>
+            <h3>
+              Automated analysis believes this patient{" "}
+              {result.has_covid ? " has" : " does not have"} COVID-19, with{" "}
+              {result.confidence}% confidence.
+            </h3>
+          </Grid>
+        </>
+      );
+    } else {
+      if (result.approved) {
+        return (
+          <>
+            <Grid item>
+              <h3
+                style={{
+                  border: "3px",
+                  borderStyle: "solid",
+                  borderColor: "green",
+                  padding: "1em",
+                }}
+              >
+                You have approved the diagnosis.
+              </h3>
+            </Grid>
+            <Grid item>
+              <h3>
+                Automated analysis believes this patient{" "}
+                {result.has_covid ? " has" : " does not have"} COVID-19, with{" "}
+                {result.confidence}% confidence.
+              </h3>
+            </Grid>
+          </>
+        );
+      }
+    }
+  }
+
   if (status === "NEEDS_DATA") {
     return (
       <Grid item>
@@ -64,68 +154,55 @@ const ResultMessage = (props) => {
             padding: "1em",
           }}
         >
-          Unfortunately, this diagnosis has NOT been approved by the health
+          Unfortunately, this diagnosis has NOT BEEN APPROVED by the health
           officer. Please create a new diagnosis with valid data.
+        </h3>
+      </Grid>
+    );
+  } else if (status === "AWAITING_REVIEW") {
+    return (
+      <Grid item>
+        <h3
+          style={{
+            border: "3px",
+            borderStyle: "solid",
+            borderColor: "purple",
+            padding: "1em",
+          }}
+        >
+          Your diagnosis is AWAITING REVIEW. Please wait for approval from the
+          health officer assigned.
         </h3>
       </Grid>
     );
   } else {
     if (result.approved) {
       return (
-        <Grid item>
-          <h3>
-            The result of this diagnosis is that{" "}
-            {staff ? "this patient" : "you"}{" "}
-            {result.has_covid
-              ? !staff
-                ? " has "
-                : " have "
-              : !staff
-              ? " do not have "
-              : " does not have "}
-            COVID-19.
-          </h3>
-        </Grid>
+        <>
+          <Grid item>
+            <h3
+              style={{
+                border: "3px",
+                borderStyle: "solid",
+                borderColor: "green",
+                padding: "1em",
+              }}
+            >
+              Your diagnosis is REVIEWED. The result of this diagnosis is that{" "}
+              {staff ? "this patient" : "you"}{" "}
+              {result.has_covid
+                ? !staff
+                  ? " HAS "
+                  : " HAVE "
+                : !staff
+                ? " DO NOT have "
+                : " DOES NOT have "}
+              COVID-19.
+            </h3>
+          </Grid>
+        </>
       );
     }
-  }
-
-  if (staff) {
-    return (
-      <>
-        <Grid item>
-          <h3>
-            Automated analysis believes this patient{" "}
-            {result.has_covid ? " has" : " does not have"} COVID-19, with{" "}
-            {result.confidence}% confidence.
-          </h3>
-        </Grid>
-        <Grid container direction="row" justify="center" spacing={1}>
-          <Grid item>
-            <Button
-              color="primary"
-              size="small"
-              variant="outlined"
-              onClick={() => actionCallback(true)}
-              className={classes.actionButton}
-            >
-              Approve
-            </Button>
-          </Grid>
-          <Grid item>
-            <Button
-              color="secondary"
-              size="small"
-              variant="outlined"
-              onClick={() => actionCallback(false)}
-              className={classes.actionButton}
-            >
-              Reject
-            </Button>
-          </Grid>
-        </Grid>
-      </>
-    );
   }
 
   return null;
@@ -339,7 +416,11 @@ export default function Diagnosis(props) {
                   </Grid>
                   <Grid item>
                     <Chip
-                      color="secondary"
+                      color={
+                        diagnosis.status === "REVIEWED"
+                          ? "primary"
+                          : "secondary"
+                      }
                       label={`Status: ${diagnosis.status}`}
                     />
                   </Grid>

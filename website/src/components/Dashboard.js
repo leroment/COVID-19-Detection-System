@@ -256,7 +256,11 @@ export default function Dashboard() {
                         colSpan={isStaff ? 3 : 4}
                       >
                         {isStaff
-                          ? "No diagnoses to review"
+                          ? content === 0
+                            ? "No diagnoses to review"
+                            : content === 1
+                            ? "No diagnoses reviewed"
+                            : "No diagnoses rejected"
                           : "No submitted diagnoses"}
                       </TableCell>
                     </TableRow>
