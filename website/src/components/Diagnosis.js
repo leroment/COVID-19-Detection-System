@@ -12,7 +12,6 @@ import {
   Button,
   Chip,
   Divider,
-  Box,
 } from "@material-ui/core";
 import { Link as RouterLink, Redirect } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
@@ -48,40 +47,57 @@ const useStyles = makeStyles({
 
 const ResultMessage = (props) => {
   const classes = useStyles();
-  const {
-    staff,
-    result,
-    actionCallback,
-  } = props;
+  const { staff, result, status, actionCallback } = props;
 
-  if(!result) {
+  if (!result) {
     return null;
   }
 
-  if(result.approved) {
+  if (status === "NEEDS_DATA") {
     return (
       <Grid item>
-        <h3>
-          The result of this diagnosis is that {staff ? "this patient" : "you"} {
-            result.has_covid
-              ? " have"
-              : " does not have"
-          } COVID-19.
+        <h3
+          style={{
+            border: "3px",
+            borderStyle: "solid",
+            borderColor: "#FF0000",
+            padding: "1em",
+          }}
+        >
+          Unfortunately, this diagnosis has NOT been approved by the health
+          officer. Please create a new diagnosis with valid data.
         </h3>
       </Grid>
     );
+  } else {
+    if (result.approved) {
+      return (
+        <Grid item>
+          <h3>
+            The result of this diagnosis is that{" "}
+            {staff ? "this patient" : "you"}{" "}
+            {result.has_covid
+              ? !staff
+                ? " has "
+                : " have "
+              : !staff
+              ? " do not have "
+              : " does not have "}
+            COVID-19.
+          </h3>
+        </Grid>
+      );
+    }
   }
 
-  if(staff) {
+  if (staff) {
     return (
       <>
         <Grid item>
           <h3>
-            Automated analysis believes this patient {
-              result.has_covid
-                ? " has"
-                : " does not have"
-            } COVID-19, with {result.confidence}% confidence.
+            Automated analysis believes this patient{" "}
+            {result.has_covid ? " has" : " does not have"} COVID-19, with{" "}
+            {result.confidence}% confidence.
           </h3>
         </Grid>
         <Grid container direction="row" justify="center" spacing={1}>
@@ -198,13 +214,11 @@ export default function Diagnosis(props) {
       : `http://127.0.0.1:8000/api/users/${user.id}/diagnoses/${diagnosisId}/`;
 
     axios
-      .get(url,
-        {
-          headers: {
-            Authorization: `Token ${localStorage.getItem("token")}`,
-          },
-        }
-      )
+      .get(url, {
+        headers: {
+          Authorization: `Token ${localStorage.getItem("token")}`,
+        },
+      })
       .then((response) => {
         setDiagnosis(response.data);
         setInfo(response.data.health_officer);
@@ -269,23 +283,25 @@ export default function Diagnosis(props) {
   });
 
   const approve = (isApproved) => {
-    axios.put(
-      `http://127.0.0.1:8000/api/healthofficers/${user.id}/diagnoses/${diagnosisId}/`,
-      {
-        "approved": isApproved,
-        // "comment": prompt("Comment"),
-      },
-      {
-        headers: {
-          Authorization: `Token ${localStorage.getItem("token")}`,
+    axios
+      .put(
+        `http://127.0.0.1:8000/api/healthofficers/${user.id}/diagnoses/${diagnosisId}/`,
+        {
+          approved: isApproved,
+          // "comment": prompt("Comment"),
         },
-      }
-    ).then(() => {
-      setReturnToDashboard(true);
-    });
+        {
+          headers: {
+            Authorization: `Token ${localStorage.getItem("token")}`,
+          },
+        }
+      )
+      .then(() => {
+        setReturnToDashboard(true);
+      });
   };
 
-  if(returnToDashboard) {
+  if (returnToDashboard) {
     return <Redirect to="/dashboard" />;
   }
 
@@ -337,9 +353,19 @@ export default function Diagnosis(props) {
                   spacing={1}
                   justify="space-around"
                 >
-                  <Grid item style={{flexBasis: 1}}>
-                    <Grid container direction="column" justify="flex-start" spacing={1}>
-                      <ResultMessage staff={isStaff} result={diagnosis.result} actionCallback={approve}/>
+                  <Grid item style={{ flexBasis: 1 }}>
+                    <Grid
+                      container
+                      direction="column"
+                      justify="flex-start"
+                      spacing={1}
+                    >
+                      <ResultMessage
+                        staff={isStaff}
+                        result={diagnosis.result}
+                        status={diagnosis.status}
+                        actionCallback={approve}
+                      />
                       <Grid item>
                         <Chip
                           label={`Last Status Update: ${formatDate(
@@ -362,7 +388,7 @@ export default function Diagnosis(props) {
                     </Grid>
                   </Grid>
                   <Divider orientation="vertical" flexItem />
-                  <Grid item style={{flexBasis: 1}}>
+                  <Grid item style={{ flexBasis: 1 }}>
                     <Grid container direction="column">
                       <div align="center">
                         <Grid item className={classes.box}>

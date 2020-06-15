@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { makeStyles, withStyles } from "@material-ui/core/styles";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import axios from "axios";
 import { Checkmark } from "react-checkmark";
 import {
@@ -10,6 +11,7 @@ import {
   StepLabel,
   Button,
   IconButton,
+  Backdrop,
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import MuiDialogTitle from "@material-ui/core/DialogTitle";
@@ -37,6 +39,10 @@ const useStyles = makeStyles((theme) => ({
   animation: {
     width: "300px",
     height: "300px",
+  },
+  backdrop: {
+    zIndex: theme.zIndex.drawer + 1,
+    color: "#fff",
   },
 }));
 
@@ -95,6 +101,7 @@ export default function NewDiagnosis(props) {
   const [theTemp, setTheTemp] = useState(0);
   const [theCough, setTheCough] = useState(null);
   const [theXray, setTheXray] = useState(null);
+  const [uploading, setUploading] = useState(false);
   // const [skipped, setSkipped] = useState(new Set());
   const steps = getSteps();
 
@@ -150,11 +157,13 @@ export default function NewDiagnosis(props) {
     // Temperature
     if (activeStep === 0) {
       console.log(theTemp);
+      setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
 
     // Cough
     if (activeStep === 1) {
       console.log(theCough);
+      setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
 
     // Finish
@@ -163,6 +172,8 @@ export default function NewDiagnosis(props) {
       console.log(theCough);
       console.log(theXray);
 
+      setUploading(true);
+
       // do the server push
 
       const data = new FormData();
@@ -170,34 +181,41 @@ export default function NewDiagnosis(props) {
       data.append("audio", theCough);
       data.append("data", JSON.stringify({ temperature: parseFloat(theTemp) }));
 
-      axios
-        .post(
-          `http://127.0.0.1:8000/api/users/${localStorage.getItem(
-            "userId"
-          )}/diagnoses/`,
-          data,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-              Authorization: `Token ${localStorage.getItem("token")}`,
-            },
-          }
-        )
-        .then((response) => {
-          console.log(response);
-        })
-        .catch((err) => {
-          console.log(err.response);
-        });
+      createDiagnosis(data);
 
       setTheXray(null);
       setTheCough(null);
       setTheTemp(0);
     }
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+
+    // setActiveStep((prevActiveStep) => prevActiveStep + 1);
 
     // setSkipped(newSkipped);
   };
+
+  async function createDiagnosis(data) {
+    await axios
+      .post(
+        `http://127.0.0.1:8000/api/users/${localStorage.getItem(
+          "userId"
+        )}/diagnoses/`,
+        data,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Token ${localStorage.getItem("token")}`,
+          },
+        }
+      )
+      .then((response) => {
+        console.log(response);
+        setUploading(false);
+        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+      })
+      .catch((err) => {
+        console.log(err.response);
+      });
+  }
 
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
@@ -304,6 +322,10 @@ export default function NewDiagnosis(props) {
               </div>
             </div>
           )}
+
+          <Backdrop className={classes.backdrop} open={uploading}>
+            <CircularProgress color="inherit" />
+          </Backdrop>
         </DialogActions>
       </Dialog>
     </div>

@@ -16,6 +16,7 @@ import {
   CardHeader,
   CardContent,
   Link,
+  ButtonGroup,
 } from "@material-ui/core";
 import { grey } from "@material-ui/core/colors";
 import NewDiagnosis from "./NewDiagnosis";
@@ -64,23 +65,26 @@ export default function Dashboard() {
   const classes = useStyles();
   const [open, setOpen] = useState(false);
   const [diagnoses, setDiagnoses] = useState([]);
+  const [content, setContent] = useState(0);
 
   const user = JSON.parse(localStorage.getItem("user"));
   const isStaff = user.is_staff;
 
-  const fetchDiagnoses = () => {
+  const fetchDiagnoses = (what = 0) => {
     const url = isStaff
-      ? `http://127.0.0.1:8000/api/healthofficers/${user.id}/diagnoses/?status=AWAITING_REVIEW`
+      ? what === 0
+        ? `http://127.0.0.1:8000/api/healthofficers/${user.id}/diagnoses/?status=AWAITING_REVIEW`
+        : what === 1
+        ? `http://127.0.0.1:8000/api/healthofficers/${user.id}/diagnoses/?status=REVIEWED`
+        : `http://127.0.0.1:8000/api/healthofficers/${user.id}/diagnoses/?status=NEEDS_DATA`
       : `http://127.0.0.1:8000/api/users/${user.id}/diagnoses/`;
 
     axios
-      .get(url,
-        {
-          headers: {
-            Authorization: `Token ${localStorage.getItem("token")}`,
-          },
-        }
-      )
+      .get(url, {
+        headers: {
+          Authorization: `Token ${localStorage.getItem("token")}`,
+        },
+      })
       .then((response) => {
         setDiagnoses(response.data);
       })
@@ -155,21 +159,72 @@ export default function Dashboard() {
           </Grid>
         </Grid>
         <Grid item></Grid>
+        {isStaff ? (
+          <Grid item>
+            <ButtonGroup
+              color="primary"
+              aria-label="outlined primary button group"
+            >
+              <Button
+                variant={content === 0 ? "contained" : "outlined"}
+                onClick={() => {
+                  setContent(0);
+                  fetchDiagnoses(0);
+                }}
+              >
+                Diagnoses Awaiting Review
+              </Button>
+              <Button
+                variant={content === 1 ? "contained" : "outlined"}
+                onClick={() => {
+                  setContent(1);
+                  fetchDiagnoses(1);
+                }}
+              >
+                Diagnoses Reviewed
+              </Button>
+              <Button
+                variant={content === 2 ? "contained" : "outlined"}
+                onClick={() => {
+                  setContent(2);
+                  fetchDiagnoses(2);
+                }}
+              >
+                Diagnoses Rejected
+              </Button>
+            </ButtonGroup>
+          </Grid>
+        ) : (
+          <React.Fragment></React.Fragment>
+        )}
+
         <Grid item lg={12}>
           <Card>
             <CardHeader
               action={
-                <Button
-                  color="primary"
-                  size="small"
-                  variant="outlined"
-                  onClick={handleClickOpen}
-                  className={classes.actionButton}
-                >
-                  New Diagnosis +
-                </Button>
+                !isStaff ? (
+                  <Button
+                    color="primary"
+                    size="small"
+                    variant="outlined"
+                    onClick={handleClickOpen}
+                    className={classes.actionButton}
+                  >
+                    New Diagnosis +
+                  </Button>
+                ) : (
+                  <React.Fragment></React.Fragment>
+                )
               }
-              title={isStaff ? "Diagnoses Awaiting Review" : "Current Diagnoses"}
+              title={
+                isStaff
+                  ? content === 0
+                    ? "Diagnoses Awaiting Review"
+                    : content === 1
+                    ? "Diagnoses Reviewed"
+                    : "Diagnoses Rejected"
+                  : "My Diagnoses"
+              }
             />
             <NewDiagnosis open={open} parentCallback={callback} />
             <Divider />
@@ -178,9 +233,7 @@ export default function Dashboard() {
                 <TableHead>
                   <TableRow>
                     <TableCell>Diagnosis ID</TableCell>
-                    {!isStaff && (
-                      <TableCell>Health Officer Assigned</TableCell>
-                    )}
+                    {!isStaff && <TableCell>Health Officer Assigned</TableCell>}
                     <TableCell>Status</TableCell>
                     <TableCell>Date Submitted</TableCell>
                   </TableRow>
@@ -196,11 +249,19 @@ export default function Dashboard() {
                       <TableCell align="left">{row.dateSubmitted}</TableCell>
                     </TableRow>
                   ))} */}
-                  {diagnoses.length == 0 && (
+                  {diagnoses.length === 0 && (
                     <TableRow>
-                      <TableCell style={{textAlign: 'center'}} colSpan={isStaff ? 3 : 4}>{isStaff ? "No diagnoses to review" : "No submitted diagnoses"}</TableCell>
+                      <TableCell
+                        style={{ textAlign: "center" }}
+                        colSpan={isStaff ? 3 : 4}
+                      >
+                        {isStaff
+                          ? "No diagnoses to review"
+                          : "No submitted diagnoses"}
+                      </TableCell>
                     </TableRow>
                   )}
+                  {/* {getContent(content)} */}
                   {diagnoses.map((diagnosis, index) => (
                     <TableRow key={index}>
                       <TableCell component="th" scope="row">
