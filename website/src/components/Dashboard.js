@@ -18,11 +18,18 @@ import {
   Link,
   ButtonGroup,
   Typography,
+  Avatar,
 } from "@material-ui/core";
 import { grey } from "@material-ui/core/colors";
 import NewDiagnosis from "./NewDiagnosis";
+import PeopleIcon from "@material-ui/icons/People";
+import LocalHospitalIcon from "@material-ui/icons/LocalHospital";
+import RateReviewIcon from "@material-ui/icons/RateReview";
+import ReportProblemIcon from "@material-ui/icons/ReportProblem";
+import TimerIcon from "@material-ui/icons/Timer";
+import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   table: {
     minWidth: "80vh",
   },
@@ -39,8 +46,25 @@ const useStyles = makeStyles({
   grid2: {
     marginTop: "25vh",
   },
+  title: {
+    fontWeight: 700,
+  },
   button: {
     margin: "0px 0px 10px 82%",
+  },
+  avatar: {
+    backgroundColor: theme.palette.primary.main,
+    height: 56,
+    width: 56,
+  },
+  avatarSecondary: {
+    backgroundColor: theme.palette.secondary.main,
+    height: 56,
+    width: 56,
+  },
+  icon: {
+    height: 32,
+    width: 32,
   },
   actionButton: {
     margin: "7px 0 0 0",
@@ -52,7 +76,34 @@ const useStyles = makeStyles({
   actions: {
     justifyContent: "flex-end",
   },
-});
+  difference: {
+    marginTop: theme.spacing(2),
+    display: "flex",
+    alignItems: "center",
+  },
+  differenceIcon: {
+    color: theme.palette.success.dark,
+  },
+  avatarSuccess: {
+    backgroundColor: theme.palette.success.main,
+    height: 56,
+    width: 56,
+  },
+  avatarError: {
+    backgroundColor: theme.palette.error.main,
+    height: 56,
+    width: 56,
+  },
+  avatarUsers: {
+    backgroundColor: theme.palette.grey[900],
+    height: 56,
+    width: 56,
+  },
+  differenceValue: {
+    color: theme.palette.success.dark,
+    marginRight: theme.spacing(1),
+  },
+}));
 
 export default function Dashboard() {
   const classes = useStyles();
@@ -163,50 +214,176 @@ export default function Dashboard() {
             <Grid item>
               <Card className={classes.card}>
                 <CardContent>
-                  <Typography component="h5" variant="h5" align="center">
-                    Active Users
-                    <p>{activeUsers}</p>
-                  </Typography>
+                  <Grid container justify="space-between">
+                    <Grid item>
+                      <Typography
+                        className={classes.title}
+                        color="textSecondary"
+                        gutterBottom
+                        variant="body2"
+                      >
+                        ACTIVE USERS
+                      </Typography>
+                      <Typography variant="h3">{activeUsers}</Typography>
+                    </Grid>
+                    <Grid item>
+                      <Avatar className={classes.avatarUsers}>
+                        <PeopleIcon className={classes.icon} />
+                      </Avatar>
+                    </Grid>
+                  </Grid>
+                  <div className={classes.difference}>
+                    <ArrowUpwardIcon className={classes.differenceIcon} />
+                    <Typography
+                      className={classes.differenceValue}
+                      variant="body2"
+                    ></Typography>
+                    <Typography className={classes.caption} variant="caption">
+                      Users with submitted diagnosis
+                    </Typography>
+                  </div>
                 </CardContent>
               </Card>
             </Grid>
             <Grid item>
               <Card className={classes.card}>
                 <CardContent>
-                  <Typography component="h5" variant="h5" align="center">
-                    Total Diagnoses
-                    <p>{totalDiagnoses}</p>
-                  </Typography>
+                  <Grid container justify="space-between">
+                    <Grid item>
+                      <Typography
+                        className={classes.title}
+                        color="textSecondary"
+                        gutterBottom
+                        variant="body2"
+                      >
+                        TOTAL DIAGNOSES
+                      </Typography>
+                      <Typography variant="h3">{totalDiagnoses}</Typography>
+                    </Grid>
+                    <Grid item>
+                      <Avatar className={classes.avatar}>
+                        <LocalHospitalIcon className={classes.icon} />
+                      </Avatar>
+                    </Grid>
+                  </Grid>
+                  <div className={classes.difference}>
+                    <ArrowUpwardIcon className={classes.differenceIcon} />
+                    <Typography
+                      className={classes.differenceValue}
+                      variant="body2"
+                    ></Typography>
+                    <Typography className={classes.caption} variant="caption">
+                      Total diagnoses submitted
+                    </Typography>
+                  </div>
                 </CardContent>
               </Card>
             </Grid>
             <Grid item>
               <Card className={classes.card}>
                 <CardContent>
-                  <Typography component="h5" variant="h5" align="center">
-                    Total Reviewed Diagonses
-                    <p>{totalReviewedDiagnoses}</p>
-                  </Typography>
+                  <Grid container justify="space-between">
+                    <Grid item>
+                      <Typography
+                        className={classes.title}
+                        color="textSecondary"
+                        gutterBottom
+                        variant="body2"
+                      >
+                        REVIEWED DIAGNOSES
+                      </Typography>
+                      <Typography variant="h3">
+                        {totalReviewedDiagnoses}
+                      </Typography>
+                    </Grid>
+                    <Grid item>
+                      <Avatar className={classes.avatarSuccess}>
+                        <RateReviewIcon className={classes.icon} />
+                      </Avatar>
+                    </Grid>
+                  </Grid>
+                  <div className={classes.difference}>
+                    <ArrowUpwardIcon className={classes.differenceIcon} />
+                    <Typography
+                      className={classes.differenceValue}
+                      variant="body2"
+                    ></Typography>
+                    <Typography className={classes.caption} variant="caption">
+                      Total reviewed diagnoses
+                    </Typography>
+                  </div>
                 </CardContent>
               </Card>
             </Grid>
             <Grid item>
               <Card className={classes.card}>
                 <CardContent>
-                  <Typography component="h5" variant="h5" align="center">
-                    Total Infected
-                    <p>{totalInfected}</p>
-                  </Typography>
+                  <Grid container justify="space-between">
+                    <Grid item>
+                      <Typography
+                        className={classes.title}
+                        color="textSecondary"
+                        gutterBottom
+                        variant="body2"
+                      >
+                        TOTAL INFECTED
+                      </Typography>
+                      <Typography variant="h3">{totalInfected}</Typography>
+                    </Grid>
+                    <Grid item>
+                      <Avatar className={classes.avatarError}>
+                        <ReportProblemIcon className={classes.icon} />
+                      </Avatar>
+                    </Grid>
+                  </Grid>
+                  <div className={classes.difference}>
+                    <ArrowUpwardIcon className={classes.differenceIcon} />
+                    <Typography
+                      className={classes.differenceValue}
+                      variant="body2"
+                    ></Typography>
+                    <Typography className={classes.caption} variant="caption">
+                      Total users infected
+                    </Typography>
+                  </div>
                 </CardContent>
               </Card>
             </Grid>
             <Grid item>
               <Card className={classes.card}>
                 <CardContent>
-                  <Typography component="h5" variant="h5" align="center">
-                    Seconds Since Positive
-                    <p>{secondsSincePositive}</p>
-                  </Typography>
+                  <Grid container justify="space-between">
+                    <Grid item>
+                      <Typography
+                        className={classes.title}
+                        color="textSecondary"
+                        gutterBottom
+                        variant="body2"
+                      >
+                        SECONDS INFECTED
+                      </Typography>
+                      <Typography variant="h3">
+                        {secondsSincePositive == null
+                          ? "None"
+                          : secondsSincePositive}
+                      </Typography>
+                    </Grid>
+                    <Grid item>
+                      <Avatar className={classes.avatarSecondary}>
+                        <TimerIcon className={classes.icon} />
+                      </Avatar>
+                    </Grid>
+                  </Grid>
+                  <div className={classes.difference}>
+                    <ArrowUpwardIcon className={classes.differenceIcon} />
+                    <Typography
+                      className={classes.differenceValue}
+                      variant="body2"
+                    ></Typography>
+                    <Typography className={classes.caption} variant="caption">
+                      Seconds since last infection
+                    </Typography>
+                  </div>
                 </CardContent>
               </Card>
             </Grid>

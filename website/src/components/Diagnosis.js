@@ -17,7 +17,7 @@ import { Link as RouterLink, Redirect } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import { grey } from "@material-ui/core/colors";
 import Thermometer from "react-thermometer-component";
-import AudioPlayer from "react-h5-audio-player";
+// import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/lib/styles.css";
 
 const useStyles = makeStyles({
@@ -257,14 +257,14 @@ export default function Diagnosis(props) {
         );
       case 1:
         return (
-          // <audio
-          //   controls
-          //   controlsList="nodownload"
-          //   src={`http://127.0.0.1:8000/api/audios/${audio}`}
-          //   style={{ marginTop: "10vh" }}
-          // ></audio>
+          <audio
+            controls
+            controlsList="nodownload"
+            src={`http://127.0.0.1:8000/api/audios/${audio}`}
+            style={{ marginTop: "15vh" }}
+          ></audio>
 
-          <AudioPlayer src={`http://127.0.0.1:8000/api/audios/${audio}`} />
+          // <AudioPlayer src={`http://127.0.0.1:8000/api/audios/${audio}`} />
         );
       case 2:
         return (
