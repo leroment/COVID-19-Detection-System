@@ -17,6 +17,7 @@ import {
   CardContent,
   Link,
   ButtonGroup,
+  Typography,
 } from "@material-ui/core";
 import { grey } from "@material-ui/core/colors";
 import NewDiagnosis from "./NewDiagnosis";
@@ -34,6 +35,9 @@ const useStyles = makeStyles({
   },
   grid: {
     marginTop: "10vh",
+  },
+  grid2: {
+    marginTop: "25vh",
   },
   button: {
     margin: "0px 0px 10px 82%",
@@ -66,6 +70,7 @@ export default function Dashboard() {
   const [open, setOpen] = useState(false);
   const [diagnoses, setDiagnoses] = useState([]);
   const [content, setContent] = useState(0);
+  const [count, setCount] = useState(0);
 
   const user = JSON.parse(localStorage.getItem("user"));
   const isStaff = user.is_staff;
@@ -134,30 +139,47 @@ export default function Dashboard() {
         alignItems="center"
         spacing={2}
       >
-        <Grid
-          className={classes.grid}
-          container
-          direction="row"
-          justify="center"
-          alignItems="center"
-          spacing={3}
-        >
-          <Grid item>
-            <Card className={classes.card}>
-              <CardContent></CardContent>
-            </Card>
+        {isStaff ? (
+          <Grid
+            className={classes.grid}
+            container
+            direction="row"
+            justify="center"
+            alignItems="center"
+            spacing={3}
+          >
+            <Grid item>
+              <Card className={classes.card}>
+                <CardContent>
+                  <Typography component="h5" variant="h5" align="center">
+                    Number of People Diagnosed
+                    <p>{count}</p>
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item>
+              <Card className={classes.card}>
+                <CardContent></CardContent>
+              </Card>
+            </Grid>
+            <Grid item>
+              <Card className={classes.card}>
+                <CardContent></CardContent>
+              </Card>
+            </Grid>
           </Grid>
-          <Grid item>
-            <Card className={classes.card}>
-              <CardContent></CardContent>
-            </Card>
-          </Grid>
-          <Grid item>
-            <Card className={classes.card}>
-              <CardContent></CardContent>
-            </Card>
-          </Grid>
-        </Grid>
+        ) : (
+          <Grid
+            className={classes.grid2}
+            container
+            direction="row"
+            justify="center"
+            alignItems="center"
+            spacing={3}
+          ></Grid>
+        )}
+
         <Grid item></Grid>
         {isStaff ? (
           <Grid item>
@@ -197,7 +219,6 @@ export default function Dashboard() {
         ) : (
           <React.Fragment></React.Fragment>
         )}
-
         <Grid item lg={12}>
           <Card>
             <CardHeader
