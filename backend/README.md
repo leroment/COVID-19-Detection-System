@@ -445,7 +445,7 @@ GET /api/stats/
     "total_diagnoses": <integer>,
     "total_reviewed_diagnoses": <integer>,
     "total_infected": <integer>,
-    "seconds_since_positive": <integer>
+    "seconds_since_positive": <integer> or null if no positive diagnoses
 }
 ```
 
