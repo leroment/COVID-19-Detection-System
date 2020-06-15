@@ -6,12 +6,12 @@ import {
   AppBar,
   Typography,
   IconButton,
-  Badge,
+  // Badge,
   Menu,
   MenuItem,
 } from "@material-ui/core";
 import { AccountCircle } from "@material-ui/icons";
-import NotificationsIcon from "@material-ui/icons/Notifications";
+// import NotificationsIcon from "@material-ui/icons/Notifications";
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -46,7 +46,7 @@ export default function Menubar() {
 
   const handleLogout = () => {
     setAnchorEl(null);
-    localStorage.removeItem('token');
+    localStorage.removeItem("token");
     setRedirectToLogin(true);
   };
 
@@ -80,11 +80,11 @@ export default function Menubar() {
           </Typography>
           <div className={classes.grow} />
           <div className={classes.sectionDesktop}>
-            <IconButton aria-label="show 17 new notifications" color="inherit">
+            {/* <IconButton aria-label="show 17 new notifications" color="inherit">
               <Badge badgeContent={0} color="secondary">
                 <NotificationsIcon />
               </Badge>
-            </IconButton>
+            </IconButton> */}
             <IconButton
               edge="end"
               aria-label="account of current user"

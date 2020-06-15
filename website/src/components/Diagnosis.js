@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+/* eslint-disable */
+import React, { useState, useEffect } from "react";
 import Menubar from "./Menubar";
 import axios from "axios";
 import {
@@ -222,7 +223,7 @@ export default function Diagnosis(props) {
 
   const [returnToDashboard, setReturnToDashboard] = useState(false);
 
-  const isInitialMount = useRef(true);
+  // const isInitialMount = useRef(true);
   const user = JSON.parse(localStorage.getItem("user"));
   const isStaff = user.is_staff;
 
@@ -256,7 +257,7 @@ export default function Diagnosis(props) {
             height="100%"
             width="100%"
             style={{
-              objectFit: 'contain'
+              objectFit: "contain",
             }}
           />
         );
@@ -361,7 +362,7 @@ export default function Diagnosis(props) {
   }, []);
 
   useEffect(() => {
-    if(diagnosis && Object.keys(diagnosis).length !== 0) {
+    if (diagnosis && Object.keys(diagnosis).length !== 0) {
       fetchXray();
       fetchAudio();
       fetchTemp();
@@ -457,7 +458,13 @@ export default function Diagnosis(props) {
                         status={diagnosis.status}
                         actionCallback={approve}
                       />
-                      <Grid item style={{ marginTop: "none" }}>
+                      <Grid
+                        hidden={
+                          diagnosis.status === "AWAITING_REVIEW" && !isStaff
+                        }
+                        item
+                        style={{ marginTop: "none" }}
+                      >
                         <p
                           style={{
                             textDecoration: "underline",
@@ -472,7 +479,11 @@ export default function Diagnosis(props) {
                           multiline
                           rows={4}
                           variant="outlined"
-                          disabled={!isStaff}
+                          disabled={
+                            !isStaff ||
+                            diagnosis.status === "REVIEWED" ||
+                            diagnosis.status === "NEEDS_DATA"
+                          }
                           value={comment}
                           onChange={(event) => {
                             setComment(event.target.value);
