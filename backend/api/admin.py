@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Diagnosis, XrayImage, AudioRecording, TemperatureReading
+from .models import Diagnosis, XrayImage, AudioRecording, TemperatureReading, DiagnosisResult
 
 # Register your models here.
 
@@ -17,4 +17,8 @@ class AudioAdmin(admin.ModelAdmin):
 
 @admin.register(TemperatureReading)
 class TemperatureAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(DiagnosisResult)
+class DiagnosisResultAdmin(admin.ModelAdmin):
     pass
