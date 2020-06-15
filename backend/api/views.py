@@ -34,7 +34,8 @@ class HealthOfficerOnly(BasePermission):
     message = 'Not a health officer'
 
     def has_permission(self, request, view):
-        healthofficer_id = int(request.resolver_match.kwargs['healthofficer_pk'])
+        healthofficer_id = int(
+            request.resolver_match.kwargs['healthofficer_pk'])
         return request.user.is_staff and request.user.id == healthofficer_id
 
 
@@ -101,8 +102,10 @@ class UserDiagnosisViewSet(viewsets.ModelViewSet):
         temp_outcome = False
 
         # run xray and sound detection
-        xray_out = subprocess.check_output(['python', 'api/scripts/xray-analysis/covid19_recognise_new.py', xray_file.temporary_file_path()])
-        soundfile_out = subprocess.check_output(['python', 'api/scripts/cough-detection/coughdetect_new.py', audio_file.temporary_file_path()])
+        xray_out = subprocess.check_output(
+            ['python3', 'api/scripts/xray-analysis/covid19_recognise_new.py', xray_file.temporary_file_path()])
+        soundfile_out = subprocess.check_output(
+            ['python3', 'api/scripts/cough-detection/coughdetect_new.py', audio_file.temporary_file_path()])
 
         # # outcome converted to string (Positive/Negative) xray comes with probability percentage
         xray_string = xray_out.decode()
@@ -119,7 +122,7 @@ class UserDiagnosisViewSet(viewsets.ModelViewSet):
         if (data['temperature'] >= 38):
             temp_outcome = True
 
-        #COVID determination
+        # COVID determination
         if (confidence_value >= 80):
             covid_outcome = True
 
@@ -133,7 +136,8 @@ class UserDiagnosisViewSet(viewsets.ModelViewSet):
         health_officer = (
             User.objects
             .filter(is_staff=True)
-            .annotate(diagnosis_count=Count('health_officer_diagnoses', filter=~Q(health_officer_diagnoses__status=DiagnosisStatus.REVIEWED)))  # include waiting, processing and awaiting review diagnoses
+            # include waiting, processing and awaiting review diagnoses
+            .annotate(diagnosis_count=Count('health_officer_diagnoses', filter=~Q(health_officer_diagnoses__status=DiagnosisStatus.REVIEWED)))
             .order_by('diagnosis_count')
             .first()
         )
@@ -198,7 +202,8 @@ class HealthOfficerDiagnosisViewSet(viewsets.ReadOnlyModelViewSet):
             if status_filter:
                 qs = qs.filter(status=DiagnosisStatus[status_filter])
         except KeyError:
-            raise ValidationError({'status': status_filter + ' is not a valid status'})
+            raise ValidationError(
+                {'status': status_filter + ' is not a valid status'})
         return qs
 
     def update(self, request, *args, **kwargs):
@@ -229,14 +234,14 @@ class HealthOfficerDiagnosisViewSet(viewsets.ReadOnlyModelViewSet):
             instance.status = DiagnosisStatus.NEEDS_DATA
         instance.save()
 
-        latest_result = DiagnosisResult.objects.filter(diagnosis=instance).order_by('last_update').last()
+        latest_result = DiagnosisResult.objects.filter(
+            diagnosis=instance).order_by('last_update').last()
         latest_result.approved = True
         if comment:
             latest_result.comment = comment
         latest_result.save()
 
         return Response(self.serializer_class(instance).data)
-
 
 
 class XrayViewSet(viewsets.ReadOnlyModelViewSet):
@@ -266,7 +271,8 @@ class TemperatureViewSet(viewsets.ReadOnlyModelViewSet):
 
 class LoginView(APIView):
     def post(self, request):
-        user = authenticate(username=request.data.get('email'), password=request.data.get('password'))
+        user = authenticate(username=request.data.get(
+            'email'), password=request.data.get('password'))
         if user is not None:
             (token, created) = Token.objects.get_or_create(user=user)
             return Response({
